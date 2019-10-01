@@ -82,66 +82,68 @@ func attachReader() (getch, error) {
 
 						err = ioctl(gl.out.Fd(), syscall.TCGETS, &gl.origTios)
 
-						// Reconfigure terminal attributes - see Linux termios
-
-						tios := gl.origTios
-
-						// Unsetting the following input mode flags means:
-
-						// IGNBRK Don't ignore BREAK condition on input
-						// BRKINT Breaks don't cause SIGINT to be send and read as \0
-						// PARMRK Bytes with parity or framing errors are not marked
-						// ISTRIP Do not strip off the eighth bit
-						// INLCR Do not translate newline to carriage return on input
-						// IGNCR No not ignore carriage return on input
-						// ICRNL Do not translate carriage return to newline on input
-						// IXON Do not enable XON/XOFF flow control on input
-
-						tios.Iflag &^= syscall.IGNBRK | syscall.BRKINT | syscall.PARMRK |
-							syscall.ISTRIP | syscall.INLCR | syscall.IGNCR |
-							syscall.ICRNL | syscall.IXON
-
-						// Unsetting the following local mode flags means:
-
-						// ECHO Do not echo input characters
-						// ECHONL Do not echo newline characters
-						// ICANON Do not operate in canonical mode - i.e. no line buffering
-						// ISIG Do not generate signals when receiving either INTR, QUIT,
-						//      SUSP, or DSUSP characters
-						// IEXTEN Do not enable implementation-defined input processing
-
-						tios.Lflag &^= syscall.ECHO | syscall.ECHONL | syscall.ICANON |
-							syscall.ISIG | syscall.IEXTEN
-
-						// Unsetting the following control mode flags means:
-
-						// CSIZE Clear any character size mask
-						// PARENB Do not enable parity generation on output and
-						//        parity checking for input
-
-						tios.Cflag &^= syscall.CSIZE | syscall.PARENB
-
-						// Set character size mask 8 bit
-
-						tios.Cflag |= syscall.CS8
-
-						// Set minimum number of characters for noncanonical read
-
-						tios.Cc[syscall.VMIN] = 1
-
-						// Set timeout in deciseconds for noncanonical read
-
-						tios.Cc[syscall.VTIME] = 0
-
-						err = ioctl(gl.out.Fd(), syscall.TCSETS, &tios)
-
 						if err == nil {
+							// Reconfigure terminal attributes - see Linux termios
 
-							// All is well we can start listening for events
+							tios := gl.origTios
 
-							go gl.eventListener()
+							// Unsetting the following input mode flags means:
 
-							return gl, nil
+							// IGNBRK Don't ignore BREAK condition on input
+							// BRKINT Breaks don't cause SIGINT to be send and read as \0
+							// PARMRK Bytes with parity or framing errors are not marked
+							// ISTRIP Do not strip off the eighth bit
+							// INLCR Do not translate newline to carriage return on input
+							// IGNCR No not ignore carriage return on input
+							// ICRNL Do not translate carriage return to newline on input
+							// IXON Do not enable XON/XOFF flow control on input
+
+							tios.Iflag &^= syscall.IGNBRK | syscall.BRKINT | syscall.PARMRK |
+								syscall.ISTRIP | syscall.INLCR | syscall.IGNCR |
+								syscall.ICRNL | syscall.IXON
+
+							// Unsetting the following local mode flags means:
+
+							// ECHO Do not echo input characters
+							// ECHONL Do not echo newline characters
+							// ICANON Do not operate in canonical mode - i.e. no line buffering
+							// ISIG Do not generate signals when receiving either INTR, QUIT,
+							//      SUSP, or DSUSP characters
+							// IEXTEN Do not enable implementation-defined input processing
+
+							tios.Lflag &^= syscall.ECHO | syscall.ECHONL | syscall.ICANON |
+								syscall.ISIG | syscall.IEXTEN
+
+							// Unsetting the following control mode flags means:
+
+							// CSIZE Clear any character size mask
+							// PARENB Do not enable parity generation on output and
+							//        parity checking for input
+
+							tios.Cflag &^= syscall.CSIZE | syscall.PARENB
+
+							// Set character size mask 8 bit
+
+							tios.Cflag |= syscall.CS8
+
+							// Set minimum number of characters for noncanonical read
+
+							tios.Cc[syscall.VMIN] = 1
+
+							// Set timeout in deciseconds for noncanonical read
+
+							tios.Cc[syscall.VTIME] = 0
+
+							err = ioctl(gl.out.Fd(), syscall.TCSETS, &tios)
+
+							if err == nil {
+
+								// All is well we can start listening for events
+
+								go gl.eventListener()
+
+								return gl, nil
+							}
 						}
 					}
 				}

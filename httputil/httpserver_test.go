@@ -238,7 +238,7 @@ func sendTestRequest() string {
 	url := "http://localhost" + testporthttp + "/httpserver_test"
 
 	var jsonStr = []byte(`{"msg":"Hello!"}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 
@@ -273,7 +273,7 @@ func sendTestHTTPSRequest(caCert string) string {
 	url := "https://localhost" + testporthttps + "/httpsserver_test"
 
 	var jsonStr = []byte(`{"msg":"Hello!"}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 

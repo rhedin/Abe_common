@@ -502,7 +502,7 @@ Users:
 
 	pt.table = nil
 
-	// Now do the same excercise again but with syncing from memory
+	// Now do the same exercise again but with syncing from memory
 
 	if err := pt.sync(false); err != nil {
 		t.Error(err)

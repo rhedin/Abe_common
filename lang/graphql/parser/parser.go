@@ -431,7 +431,7 @@ represented by an optional fragment name, a type condition and a selection set.
 */
 func ndFragmentDefinition(p *parser, self *ASTNode) (*ASTNode, error) {
 	var err error
-	var current = p.node
+	var current *ASTNode
 
 	if p.node.Token.ID == TokenName {
 
@@ -460,18 +460,20 @@ func ndFragmentDefinition(p *parser, self *ASTNode) (*ASTNode, error) {
 		} else {
 			p.node, err = p.next()
 
-			if p.node.Token.ID == TokenName {
+			if err == nil {
+				if p.node.Token.ID == TokenName {
 
-				// Append the fragment name
+					// Append the fragment name
 
-				changeAstNode(p.node, NodeTypeCondition, p)
-				self.Children = append(self.Children, p.node)
-				p.node, err = p.next()
+					changeAstNode(p.node, NodeTypeCondition, p)
+					self.Children = append(self.Children, p.node)
+					p.node, err = p.next()
 
-			} else {
+				} else {
 
-				err = p.newParserError(ErrNameExpected,
-					p.node.Token.String(), *p.node.Token)
+					err = p.newParserError(ErrNameExpected,
+						p.node.Token.String(), *p.node.Token)
+				}
 			}
 		}
 	}
@@ -751,7 +753,7 @@ ndDirectives parses a directive expression. (@spec 2.12)
 */
 func ndDirectives(p *parser, self *ASTNode) (*ASTNode, error) {
 	var err error
-	var current = p.node
+	var current *ASTNode
 
 	dir := newAstNode(NodeDirective, p, p.node.Token)
 

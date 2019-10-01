@@ -27,13 +27,13 @@ import (
 KeyHandler handles specific key events. KeyHandlers are used to extend the
 functionality of the normal ConsoleLineTerminal. Returns if the event was
 consumed (no further handling possible), a new input buffer and any errors
-that might have occured. The new input buffer is ignored if it is nil.
+that might have occurred. The new input buffer is ignored if it is nil.
 */
 type KeyHandler func(*getch.KeyEvent, []rune) (bool, []rune, error)
 
 /*
 ConsoleLineTerminal is the most common console terminal implementation. The
-user types input and a choosen backend records the input by key. It has a
+user types input and a chosen backend records the input by key. It has a
 graceful fallback to a standard line reader for all other platforms. The
 functionality can be extended by adding key handlers.
 

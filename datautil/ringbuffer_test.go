@@ -109,7 +109,7 @@ EEE`[1:] {
 	rb.Reset()
 
 	if !rb.IsEmpty() {
-		t.Error("Buffer shoudl be empty after a reset")
+		t.Error("Buffer should be empty after a reset")
 		return
 	}
 }

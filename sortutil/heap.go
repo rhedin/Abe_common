@@ -48,7 +48,7 @@ func (h *IntHeap) Peek() int {
 }
 
 /*
-RemoveFirst removes the first occurences of item r from the IntHeap.
+RemoveFirst removes the first occurrences of item r from the IntHeap.
 */
 func (h *IntHeap) RemoveFirst(r int) {
 	heapList := *h
@@ -67,7 +67,7 @@ func (h *IntHeap) RemoveFirst(r int) {
 }
 
 /*
-RemoveAll removes all occurences of item r from the IntHeap.
+RemoveAll removes all occurrences of item r from the IntHeap.
 */
 func (h *IntHeap) RemoveAll(r int) {
 	newHeap := &IntHeap{}

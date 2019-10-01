@@ -114,7 +114,7 @@ func TestCookieAuth(t *testing.T) {
 
 	// Login request
 
-	res, resp = sendTestRequest(TESTQUERYURL+"/login", "GET", map[string]string{
+	_, resp = sendTestRequest(TESTQUERYURL+"/login", "GET", map[string]string{
 		"user1": "yams",
 		"pass1": "yams",
 	}, nil, nil)
@@ -228,7 +228,7 @@ func TestCookieAuth(t *testing.T) {
 
 	// Wrong credentials - error message depends on custom handler
 
-	res, resp = sendTestRequest(TESTQUERYURL+"/login", "GET", map[string]string{
+	_, resp = sendTestRequest(TESTQUERYURL+"/login", "GET", map[string]string{
 		"user1": "yams",
 		"pass1": "yams1",
 	}, nil, nil)

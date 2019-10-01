@@ -71,7 +71,7 @@ func NewMultiFileBuffer(filename string, it FilenameIterator, cond RolloverCondi
 
 	}
 
-	return mfb, nil
+	return mfb, err
 }
 
 /*
@@ -96,9 +96,11 @@ func (mfb *MultiFileBuffer) Write(output []byte) (int, error) {
 
 		}
 
-		mfb.lock.Lock()
-		b, err = mfb.fp.Write(output)
-		mfb.lock.Unlock()
+		if err == nil {
+			mfb.lock.Lock()
+			b, err = mfb.fp.Write(output)
+			mfb.lock.Unlock()
+		}
 	}
 
 	return b, err

@@ -38,7 +38,7 @@ type Task interface {
 	Run() error
 
 	/*
-		HandleError handles an error which occured during the run method.
+		HandleError handles an error which occurred during the run method.
 	*/
 	HandleError(e error)
 }

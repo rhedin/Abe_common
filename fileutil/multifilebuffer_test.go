@@ -275,7 +275,7 @@ func TestMultiFileBufferSimpleNumbering(t *testing.T) {
 
 	// Create a new buffer
 
-	buf, err = NewMultiFileBuffer(filename,
+	buf, _ = NewMultiFileBuffer(filename,
 		ConsecutiveNumberIterator(3), SizeBasedRolloverCondition(4))
 
 	for i := 0; i < 4; i++ {

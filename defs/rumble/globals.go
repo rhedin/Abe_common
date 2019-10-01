@@ -1,7 +1,7 @@
 /*
- * Rambazamba
+ * Brawler
  *
- * Copyright 2016 Matthias Ladkau. All rights reserved.
+ * Copyright 2019 Matthias Ladkau. All rights reserved.
  *
  * This Source Code Form is subject to the terms of the MIT
  * License, If a copy of the MIT License was not distributed with this

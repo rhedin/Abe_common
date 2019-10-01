@@ -45,7 +45,7 @@ func TestStringEncryption(t *testing.T) {
 		return
 	}
 
-	decString, err = DecryptString("foo1", "bar")
+	_, err = DecryptString("foo1", "bar")
 	if err.Error() != "Ciphertext is too short - must be at least: 16" {
 		t.Error(err)
 		return

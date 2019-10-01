@@ -66,12 +66,13 @@ func UnzipReader(reader io.ReaderAt, size int64, dest string, overwrite bool) er
 					}
 
 					if err = os.MkdirAll(fdir, os.ModePerm); err == nil {
-						f, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+						var file *os.File
+						file, err = os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 
 						if err == nil {
-							_, err = io.Copy(f, rc)
+							_, err = io.Copy(file, rc)
 
-							f.Close()
+							file.Close()
 						}
 					}
 				}

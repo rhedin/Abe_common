@@ -53,8 +53,6 @@ func TestTimestamp(t *testing.T) {
 
 	// Test compare
 
-	ts = MakeTimestamp()
-
 	if res, err := CompareTimestamp("1475602478271", "1475615168232"); res != 1 || err != nil {
 		t.Error("Unexpected compare result:", res, err)
 		return

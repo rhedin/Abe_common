@@ -64,7 +64,7 @@ func TestPersistentMap(t *testing.T) {
 
 	pm.Flush()
 
-	pm2, err := LoadPersistentMap(testdbdir + "/testmap.map")
+	pm2, _ := LoadPersistentMap(testdbdir + "/testmap.map")
 
 	if len(pm2.Data) != 2 {
 		t.Error("Unexpected size of map")
@@ -112,7 +112,7 @@ func TestPersistentStringMap(t *testing.T) {
 
 	pm.Flush()
 
-	pm2, err := LoadPersistentStringMap(testdbdir + "/teststringmap.map")
+	pm2, _ := LoadPersistentStringMap(testdbdir + "/teststringmap.map")
 
 	if len(pm2.Data) != 2 {
 		t.Error("Unexpected size of map")

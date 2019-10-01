@@ -12,6 +12,7 @@ import (
 	"sync"
 	"testing"
 
+	"devt.de/krotik/common/errorutil"
 	"devt.de/krotik/common/httputil"
 	"devt.de/krotik/common/httputil/user"
 )
@@ -112,6 +113,8 @@ func sendTestRequest(url string, method string, headers map[string]string,
 	} else {
 		req, err = http.NewRequest(method, url, nil)
 	}
+
+	errorutil.AssertOk(err)
 
 	// Add headers
 
