@@ -165,18 +165,27 @@ Available parser AST node types
 const (
 	NodeEOF = "EOF"
 
-	NodeVALUE = "value" // Simple value
+	NodeCOMMENT    = "comment"    // Comment
+	NodeSTRING     = "string"     // String constant
+	NodeNUMBER     = "number"     // Number constant
+	NodeIDENTIFIER = "identifier" // Idendifier
 
 	// Constructed tokens
 
 	NodeSTATEMENTS = "statements" // List of statements
-	NodeLIST       = "list"       // List value
-	NodeMAP        = "map"        // Map value
-	NodeGUARD      = "guard"      // Guard expressions for conditional statements
 
-	// Map entries
+	// Assignment statement
 
-	NodeMAPENTRY = "entry" // Map entry value
+	NodeASSIGN = ":="
+
+	// Arithmetic operators
+
+	NodePLUS   = "plus"
+	NodeMINUS  = "minus"
+	NodeTIMES  = "times"
+	NodeDIV    = "div"
+	NodeMODINT = "modint"
+	NodeDIVINT = "divint"
 
 	// Boolean operators
 
@@ -186,11 +195,11 @@ const (
 
 	// Condition operators
 
-	NodeLIKE       = "like"
-	NodeIN         = "in"
-	NodeBEGINSWITH = "beginswith"
-	NodeENDSWITH   = "endswith"
-	NodeNOTIN      = "notin"
+	NodeLIKE      = "like"
+	NodeIN        = "in"
+	NodeHASPREFIX = "hasPrefix"
+	NodeHASSUFFIX = "hasSuffix"
+	NodeNOTIN     = "notin"
 
 	NodeGEQ = ">="
 	NodeLEQ = "<="
@@ -205,18 +214,15 @@ const (
 	NodeFALSE = "false"
 	NodeNULL  = "null"
 
-	// Arithmetic operators
+/*
 
-	NodePLUS   = "plus"
-	NodeMINUS  = "minus"
-	NodeTIMES  = "times"
-	NodeDIV    = "div"
-	NodeMODINT = "modint"
-	NodeDIVINT = "divint"
+	NodeLIST       = "list"       // List value
+	NodeMAP        = "map"        // Map value
+	NodeGUARD      = "guard"      // Guard expressions for conditional statements
 
-	// Assignment statement
+	// Map entries
 
-	NodeASSIGN = ":="
+	NodeMAPENTRY = "entry" // Map entry value
 
 	// Function call statement
 
@@ -244,4 +250,5 @@ const (
 
 	NodeBREAK    = "break"
 	NodeCONTINUE = "continue"
+*/
 )
