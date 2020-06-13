@@ -105,8 +105,8 @@ var KeywordMap = map[string]LexTokenID{
 	// String operators
 
 	"like":      TokenLIKE,
-	"hasPrefix": TokenHASPREFIX,
-	"hasSuffix": TokenHASSUFFIX,
+	"hasprefix": TokenHASPREFIX,
+	"hassuffix": TokenHASSUFFIX,
 
 	// List operators
 

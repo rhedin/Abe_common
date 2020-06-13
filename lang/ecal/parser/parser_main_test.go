@@ -79,3 +79,145 @@ minus
 	}
 
 }
+
+func TestArithmeticParsing(t *testing.T) {
+	input := "a + b * 5 /2"
+	expectedOutput := `
+plus
+  identifier: a
+  div
+    times
+      identifier: b
+      number: 5
+    number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	// Test brackets
+
+	input = "a + 1 * (5 + 6)"
+	expectedOutput = `
+plus
+  identifier: a
+  times
+    number: 1
+    plus
+      number: 5
+      number: 6
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = "(a + 1) * (5 / (6 - 2))"
+	expectedOutput = `
+times
+  plus
+    identifier: a
+    number: 1
+  div
+    number: 5
+    minus
+      number: 6
+      number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}
+
+func TestLogicParsing(t *testing.T) {
+	input := "not (a + 1) * 5 and tRue == false or not 1 - 5 != test"
+	expectedOutput := `
+or
+  and
+    not
+      times
+        plus
+          identifier: a
+          number: 1
+        number: 5
+    ==
+      true
+      false
+  not
+    !=
+      minus
+        number: 1
+        number: 5
+      identifier: test
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = "a > b or a <= p or b hasSuffix 'test' or c hasPrefix 'test' and x < 4 or x >= 10"
+	expectedOutput = `
+or
+  or
+    or
+      or
+        >
+          identifier: a
+          identifier: b
+        <=
+          identifier: a
+          identifier: p
+      hassuffix
+        identifier: b
+        string: 'test'
+    and
+      hasprefix
+        identifier: c
+        string: 'test'
+      <
+        identifier: x
+        number: 4
+  >=
+    identifier: x
+    number: 10
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = "(a in null or c notin d) and false like 9 or x // 6 > 2 % 1"
+	expectedOutput = `
+or
+  and
+    or
+      in
+        identifier: a
+        null
+      notin
+        identifier: c
+        identifier: d
+    like
+      false
+      number: 9
+  >
+    divint
+      identifier: x
+      number: 6
+    modint
+      number: 2
+      number: 1
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}

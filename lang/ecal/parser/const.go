@@ -197,8 +197,8 @@ const (
 
 	NodeLIKE      = "like"
 	NodeIN        = "in"
-	NodeHASPREFIX = "hasPrefix"
-	NodeHASSUFFIX = "hasSuffix"
+	NodeHASPREFIX = "hasprefix"
+	NodeHASSUFFIX = "hassuffix"
 	NodeNOTIN     = "notin"
 
 	NodeGEQ = ">="
