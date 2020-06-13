@@ -70,7 +70,7 @@ func TestCheckLocalRedirect(t *testing.T) {
 		return
 	}
 
-	if err := CheckLocalRedirect("://hans.foo/bla"); err == nil || err.Error() != "parse ://hans.foo/bla: missing protocol scheme" {
+	if err := CheckLocalRedirect("://hans.foo/bla"); err == nil || err.Error() != "parse \"://hans.foo/bla\": missing protocol scheme" {
 		t.Error(err)
 		return
 	}
