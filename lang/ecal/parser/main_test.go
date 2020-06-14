@@ -10,6 +10,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -55,7 +56,32 @@ func UnitTestParse(name string, input string) (*ASTNode, error) {
 
 	// TODO Test pretty printing
 
-	// TODO Test AST serialization
+	// Test AST serialization
+
+	if err == nil {
+		var unmarshaledJSONObject map[string]interface{}
+
+		astString, err := json.Marshal(n.ToJSONObject())
+		if err != nil {
+			return nil, fmt.Errorf("Could not marshal AST: %v", err)
+		}
+
+		if err := json.Unmarshal(astString, &unmarshaledJSONObject); err != nil {
+			return nil, fmt.Errorf("Could not unmarshal JSON object: %v", err)
+		}
+
+		unmarshaledAST, err := ASTFromJSONObject(unmarshaledJSONObject)
+		if err != nil {
+			return nil, fmt.Errorf("Could not create AST from unmarshaled JSON object: %v", err)
+		}
+
+		// String compare the ASTs
+		if ok, msg := n.Equals(unmarshaledAST); !ok {
+			return nil, fmt.Errorf(
+				"Parsed AST is different from the unmarshaled AST.\n%v\n",
+				msg)
+		}
+	}
 
 	return n, err
 }

@@ -12,6 +12,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 
 	"devt.de/krotik/common/datautil"
 	"devt.de/krotik/common/stringutil"
@@ -49,18 +50,72 @@ func (n *ASTNode) instance(p *parser, t *LexToken) *ASTNode {
 }
 
 /*
+Equal checks if this AST data equals another AST data. Returns also a message describing
+what is the found difference.
+*/
+func (n *ASTNode) Equals(other *ASTNode) (bool, string) {
+	return n.equalsPath(n.Name, other)
+}
+
+/*
+equalsPath checks if this AST data equals another AST data while preserving the search path.
+Returns also a message describing what is the found difference.
+*/
+func (n *ASTNode) equalsPath(path string, other *ASTNode) (bool, string) {
+	var res = true
+	var msg = ""
+
+	if n.Name != other.Name {
+		res = false
+		msg = fmt.Sprintf("Name is different %v vs %v\n", n.Name, other.Name)
+	}
+
+	if ok, tokenMSG := n.Token.Equals(*other.Token); !ok {
+		res = false
+		msg += fmt.Sprintf("Token is different:\n%v\n", tokenMSG)
+	}
+
+	if len(n.Children) != len(other.Children) {
+		res = false
+		msg = fmt.Sprintf("Number of children is different %v vs %v\n",
+			len(n.Children), len(other.Children))
+	} else {
+		for i, child := range n.Children {
+
+			// Check for different in children
+
+			if ok, childMSG := child.equalsPath(fmt.Sprintf("%v > %v", path, child.Name),
+				other.Children[i]); !ok {
+				return ok, childMSG
+			}
+		}
+	}
+
+	if msg != "" {
+		var buf bytes.Buffer
+		buf.WriteString("AST Nodes:\n")
+		n.levelString(0, &buf, 1)
+		buf.WriteString("vs\n")
+		other.levelString(0, &buf, 1)
+		msg = fmt.Sprintf("Path to difference: %v\n\n%v\n%v", path, msg, buf.String())
+	}
+
+	return res, msg
+}
+
+/*
 String returns a string representation of this token.
 */
 func (n *ASTNode) String() string {
 	var buf bytes.Buffer
-	n.levelString(0, &buf)
+	n.levelString(0, &buf, -1)
 	return buf.String()
 }
 
 /*
 levelString function to recursively print the tree.
 */
-func (n *ASTNode) levelString(indent int, buf *bytes.Buffer) {
+func (n *ASTNode) levelString(indent int, buf *bytes.Buffer, printChildren int) {
 
 	// Print current level
 
@@ -80,11 +135,152 @@ func (n *ASTNode) levelString(indent int, buf *bytes.Buffer) {
 
 	buf.WriteString("\n")
 
-	// Print children
+	if printChildren == -1 || printChildren > 0 {
 
-	for _, child := range n.Children {
-		child.levelString(indent+1, buf)
+		if printChildren != -1 {
+			printChildren--
+		}
+
+		// Print children
+
+		for _, child := range n.Children {
+			child.levelString(indent+1, buf, printChildren)
+		}
 	}
+}
+
+/*
+ToJSON returns this ASTNode and all its children as a JSON object.
+*/
+func (n *ASTNode) ToJSONObject() map[string]interface{} {
+	ret := make(map[string]interface{})
+
+	ret["name"] = n.Name
+
+	lenChildren := len(n.Children)
+
+	if lenChildren > 0 {
+		children := make([]map[string]interface{}, lenChildren)
+		for i, child := range n.Children {
+			children[i] = child.ToJSONObject()
+		}
+
+		ret["children"] = children
+	}
+
+	// The value is what the lexer found in the source
+
+	if n.Token != nil {
+		ret["id"] = n.Token.ID
+		if n.Token.Val != "" {
+			ret["value"] = n.Token.Val
+		}
+		ret["identifier"] = n.Token.Identifier
+		ret["pos"] = n.Token.Pos
+		ret["line"] = n.Token.Lline
+		ret["linepos"] = n.Token.Lpos
+	}
+
+	return ret
+}
+
+/*
+ASTFromPlain creates an AST from a JSON Object.
+The following nested map structure is expected:
+
+	{
+		name     : <name of node>
+
+		// Optional node information
+		value    : <value of node>
+		children : [ <child nodes> ]
+
+		// Optional token information
+		id       : <token id>
+	}
+*/
+func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
+	var astChildren []*ASTNode
+	var nodeID LexTokenID = TokenANY
+	var pos, line, linepos int
+
+	name, ok := jsonAST["name"]
+	if !ok {
+		return nil, fmt.Errorf("Found json ast node without a name: %v", jsonAST)
+	}
+
+	if nodeIDString, ok := jsonAST["id"]; ok {
+		if nodeIDInt, err := strconv.Atoi(fmt.Sprint(nodeIDString)); err == nil && IsValidTokenID(nodeIDInt) {
+			nodeID = LexTokenID(nodeIDInt)
+		}
+	}
+
+	value, ok := jsonAST["value"]
+	if !ok {
+		value = ""
+	}
+
+	identifier, ok := jsonAST["identifier"]
+	if !ok {
+		identifier = false
+	}
+
+	if posString, ok := jsonAST["pos"]; ok {
+		pos, _ = strconv.Atoi(fmt.Sprint(posString))
+	} else {
+		pos = 0
+	}
+
+	if lineString, ok := jsonAST["line"]; ok {
+		line, _ = strconv.Atoi(fmt.Sprint(lineString))
+	} else {
+		line = 0
+	}
+
+	if lineposString, ok := jsonAST["linepos"]; ok {
+		linepos, _ = strconv.Atoi(fmt.Sprint(lineposString))
+	} else {
+		linepos = 0
+	}
+
+	// Create children
+
+	if children, ok := jsonAST["children"]; ok {
+
+		if ic, ok := children.([]interface{}); ok {
+
+			// Do a list conversion if necessary - this is necessary when we parse
+			// JSON with map[string]interface{}
+
+			childrenList := make([]map[string]interface{}, len(ic))
+			for i := range ic {
+				childrenList[i] = ic[i].(map[string]interface{})
+			}
+
+			children = childrenList
+		}
+
+		for _, child := range children.([]map[string]interface{}) {
+
+			astChild, err := ASTFromJSONObject(child)
+			if err != nil {
+				return nil, err
+			}
+
+			astChildren = append(astChildren, astChild)
+		}
+	}
+
+	token := &LexToken{
+		nodeID,             // ID
+		pos,                // Pos
+		fmt.Sprint(value),  // Val
+		identifier == true, // Identifier
+		line,               // Lline
+		linepos,            // Lpos
+	}
+
+	return &ASTNode{fmt.Sprint(name), token, astChildren, nil, 0, nil, nil}, nil
 }
 
 // Look ahead buffer

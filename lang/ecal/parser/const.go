@@ -51,7 +51,7 @@ Available lexer token types
 const (
 	TokenError LexTokenID = iota // Lexing error token with a message as val
 	TokenEOF                     // End-of-file token
-	TokenAny                     // Unspecified token (used when building an AST from a Go map structure)
+	TokenANY                     // Unspecified token (used when building an AST from a Go map structure)
 
 	TokenCOMMENT    // Comment
 	TokenSTRING     // String constant
@@ -157,7 +157,16 @@ const (
 	TokenFOR
 	TokenBREAK
 	TokenCONTINUE
+
+	TokenENDLIST
 )
+
+/*
+IsValidTokenID check if a given token ID is valid.
+*/
+func IsValidTokenID(value int) bool {
+	return value < int(TokenENDLIST)
+}
 
 /*
 Available parser AST node types

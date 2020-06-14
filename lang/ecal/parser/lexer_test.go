@@ -59,6 +59,37 @@ func TestNextItem(t *testing.T) {
 	}
 }
 
+func TestEquals(t *testing.T) {
+	l := LexToList("mytest", "not\n test")
+
+	if ok, msg := l[0].Equals(l[1]); ok || msg != `ID is different 46 vs 6
+Pos is different 0 vs 5
+Val is different not vs test
+Identifier is different false vs true
+Lline is different 1 vs 2
+Lpos is different 1 vs 2
+{
+  "ID": 46,
+  "Pos": 0,
+  "Val": "not",
+  "Identifier": false,
+  "Lline": 1,
+  "Lpos": 1
+}
+vs
+{
+  "ID": 6,
+  "Pos": 5,
+  "Val": "test",
+  "Identifier": true,
+  "Lline": 2,
+  "Lpos": 2
+}` {
+		t.Error("Unexpected result:", msg)
+		return
+	}
+}
+
 func TestBasicTokenLexing(t *testing.T) {
 
 	// Test empty string parsing

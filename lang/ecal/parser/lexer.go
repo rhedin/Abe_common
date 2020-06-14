@@ -10,6 +10,8 @@
 package parser
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -31,6 +33,57 @@ type LexToken struct {
 	Identifier bool       // Flag if the value is an identifier (not quoted and not a number)
 	Lline      int        // Line in the input this token appears
 	Lpos       int        // Position in the input line this token appears
+}
+
+/*
+Equal checks if this LexToken equals another LexToken. Returns also a message describing
+what is the found difference.
+*/
+func (n LexToken) Equals(other LexToken) (bool, string) {
+	var res = true
+	var msg = ""
+
+	if n.ID != other.ID {
+		res = false
+		msg += fmt.Sprintf("ID is different %v vs %v\n", n.ID, other.ID)
+	}
+
+	if n.Pos != other.Pos {
+		res = false
+		msg += fmt.Sprintf("Pos is different %v vs %v\n", n.Pos, other.Pos)
+	}
+
+	if n.Val != other.Val {
+		res = false
+		msg += fmt.Sprintf("Val is different %v vs %v\n", n.Val, other.Val)
+	}
+
+	if n.Identifier != other.Identifier {
+		res = false
+		msg += fmt.Sprintf("Identifier is different %v vs %v\n", n.Identifier, other.Identifier)
+	}
+
+	if n.Lline != other.Lline {
+		res = false
+		msg += fmt.Sprintf("Lline is different %v vs %v\n", n.Lline, other.Lline)
+	}
+
+	if n.Lpos != other.Lpos {
+		res = false
+		msg += fmt.Sprintf("Lpos is different %v vs %v\n", n.Lpos, other.Lpos)
+	}
+
+	if msg != "" {
+		var buf bytes.Buffer
+		out, _ := json.MarshalIndent(n, "", "  ")
+		buf.WriteString(string(out))
+		buf.WriteString("\nvs\n")
+		out, _ = json.MarshalIndent(other, "", "  ")
+		buf.WriteString(string(out))
+		msg = fmt.Sprintf("%v%v", msg, buf.String())
+	}
+
+	return res, msg
 }
 
 /*
