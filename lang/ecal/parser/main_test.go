@@ -52,9 +52,11 @@ var usedNodes = map[string]bool{
 }
 
 func UnitTestParse(name string, input string) (*ASTNode, error) {
-	n, err := ParseWithRuntime(name, input, &DummyRuntimeProvider{})
+	return UnitTestParseWithPPResult(name, input, "")
+}
 
-	// TODO Test pretty printing
+func UnitTestParseWithPPResult(name string, input string, expectedPPRes string) (*ASTNode, error) {
+	n, err := ParseWithRuntime(name, input, &DummyRuntimeProvider{})
 
 	// Test AST serialization
 
@@ -75,12 +77,47 @@ func UnitTestParse(name string, input string) (*ASTNode, error) {
 			return nil, fmt.Errorf("Could not create AST from unmarshaled JSON object: %v", err)
 		}
 
-		// String compare the ASTs
-		if ok, msg := n.Equals(unmarshaledAST); !ok {
+		// Compare the ASTs
+
+		if ok, msg := n.Equals(unmarshaledAST, false); !ok {
 			return nil, fmt.Errorf(
 				"Parsed AST is different from the unmarshaled AST.\n%v\n",
 				msg)
 		}
+	}
+
+	// Test Pretty printing
+
+	if err == nil {
+
+		ppres, err := PrettyPrint(n)
+		if err != nil {
+			return nil, fmt.Errorf("Error while pretty printing: %v (input: %v)", err, input)
+		}
+
+		if expectedPPRes == "" {
+
+			n2, err := ParseWithRuntime(name, ppres, &DummyRuntimeProvider{})
+			if err != nil {
+				return nil, fmt.Errorf("Error while parsing pretty print result: %v (result: %v)", err, ppres)
+			}
+
+			// Compare the ASTs
+
+			if ok, msg := n.Equals(n2, true); !ok {
+				return nil, fmt.Errorf(
+					"Parsed AST from pretty printer is different from the originally parsed AST."+
+						"\nOriginal input: %v\nPretty printed: %v\nPretty AST: %v\n%v\n",
+					input, ppres, n2, msg)
+			}
+
+		} else if ppres != expectedPPRes {
+
+			return nil, fmt.Errorf("Expected pretty printer result is different:\nExpected "+
+				"result: %v\nActual result: %v\n", expectedPPRes, ppres)
+		}
+
+		markASTNodesAsPrettyPrinted(n)
 	}
 
 	return n, err
@@ -91,31 +128,29 @@ func UnitTestParse(name string, input string) (*ASTNode, error) {
 //
 var usedPrettyPrinterNodes = map[string]bool{}
 
-func UnitTestPrettyPrinting(input, astOutput, ppOutput string) error {
-	var visitAST func(*ASTNode)
+func markASTNodesAsPrettyPrinted(n *ASTNode) {
 
+	// Make the encountered node as used
+
+	numChildren := len(n.Children)
+	if numChildren > 0 {
+		usedPrettyPrinterNodes[fmt.Sprintf("%v_%v", n.Name, numChildren)] = true
+	} else {
+		usedPrettyPrinterNodes[n.Name] = true
+	}
+
+	for _, c := range n.Children {
+		markASTNodesAsPrettyPrinted(c)
+	}
+}
+
+func UnitTestPrettyPrinting(input, astOutput, ppOutput string) error {
 	astres, err := ParseWithRuntime("mytest", input, &DummyRuntimeProvider{})
 	if err != nil || fmt.Sprint(astres) != astOutput {
 		return fmt.Errorf("Unexpected parser output:\n%v expected was:\n%v Error: %v", astres, astOutput, err)
 	}
 
-	visitAST = func(n *ASTNode) {
-
-		// Make the encountered node as used
-
-		numChildren := len(n.Children)
-		if numChildren > 0 {
-			usedPrettyPrinterNodes[fmt.Sprintf("%v_%v", n.Name, numChildren)] = true
-		} else {
-			usedPrettyPrinterNodes[n.Name] = true
-		}
-
-		for _, c := range n.Children {
-			visitAST(c)
-		}
-	}
-
-	visitAST(astres)
+	markASTNodesAsPrettyPrinted(astres)
 
 	ppres, err := PrettyPrint(astres)
 	if err != nil || ppres != ppOutput {

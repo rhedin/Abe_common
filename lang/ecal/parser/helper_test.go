@@ -27,7 +27,7 @@ func TestASTNode(t *testing.T) {
 		return
 	}
 
-	if ok, msg := n.Equals(n2); ok || msg != `Path to difference: minus > number
+	if ok, msg := n.Equals(n2, false); ok || msg != `Path to difference: minus > number
 
 Token is different:
 Pos is different 2 vs 1
@@ -72,7 +72,7 @@ number: 2
 		return
 	}
 
-	if ok, msg := n.Equals(n2); ok || msg != `Path to difference: minus > number
+	if ok, msg := n.Equals(n2, true); ok || msg != `Path to difference: minus > number
 
 Name is different number vs identifier
 Token is different:
@@ -118,7 +118,7 @@ identifier: a
 		return
 	}
 
-	if ok, msg := n.Equals(n2); ok || msg != `Path to difference: minus
+	if ok, msg := n.Equals(n2, false); ok || msg != `Path to difference: minus
 
 Number of children is different 1 vs 2
 

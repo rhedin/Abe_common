@@ -62,7 +62,7 @@ func TestNextItem(t *testing.T) {
 func TestEquals(t *testing.T) {
 	l := LexToList("mytest", "not\n test")
 
-	if ok, msg := l[0].Equals(l[1]); ok || msg != `ID is different 46 vs 6
+	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 46 vs 6
 Pos is different 0 vs 5
 Val is different not vs test
 Identifier is different false vs true

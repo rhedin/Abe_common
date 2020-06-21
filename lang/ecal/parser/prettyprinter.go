@@ -48,6 +48,7 @@ func init() {
 		*/
 		// Arithmetic operators
 
+		NodePLUS + "_1":   template.Must(template.New(NodeMINUS).Parse("+{{.c1}}")),
 		NodePLUS + "_2":   template.Must(template.New(NodePLUS).Parse("{{.c1}} + {{.c2}}")),
 		NodeMINUS + "_1":  template.Must(template.New(NodeMINUS).Parse("-{{.c1}}")),
 		NodeMINUS + "_2":  template.Must(template.New(NodeMINUS).Parse("{{.c1}} - {{.c2}}")),
@@ -115,7 +116,8 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 
 				if _, ok := bracketPrecedenceMap[child.Name]; ok && ast.binding > child.binding {
 
-					// Put the expression in brackets if the binding would normally order things differently
+					// Put the expression in brackets iff (if and only if) the binding would
+					// normally order things differently
 
 					res = fmt.Sprintf("(%v)", res)
 				}

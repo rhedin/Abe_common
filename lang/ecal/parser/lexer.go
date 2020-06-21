@@ -39,7 +39,7 @@ type LexToken struct {
 Equal checks if this LexToken equals another LexToken. Returns also a message describing
 what is the found difference.
 */
-func (n LexToken) Equals(other LexToken) (bool, string) {
+func (n LexToken) Equals(other LexToken, ignorePosition bool) (bool, string) {
 	var res = true
 	var msg = ""
 
@@ -48,7 +48,7 @@ func (n LexToken) Equals(other LexToken) (bool, string) {
 		msg += fmt.Sprintf("ID is different %v vs %v\n", n.ID, other.ID)
 	}
 
-	if n.Pos != other.Pos {
+	if !ignorePosition && n.Pos != other.Pos {
 		res = false
 		msg += fmt.Sprintf("Pos is different %v vs %v\n", n.Pos, other.Pos)
 	}
@@ -63,12 +63,12 @@ func (n LexToken) Equals(other LexToken) (bool, string) {
 		msg += fmt.Sprintf("Identifier is different %v vs %v\n", n.Identifier, other.Identifier)
 	}
 
-	if n.Lline != other.Lline {
+	if !ignorePosition && n.Lline != other.Lline {
 		res = false
 		msg += fmt.Sprintf("Lline is different %v vs %v\n", n.Lline, other.Lline)
 	}
 
-	if n.Lpos != other.Lpos {
+	if !ignorePosition && n.Lpos != other.Lpos {
 		res = false
 		msg += fmt.Sprintf("Lpos is different %v vs %v\n", n.Lpos, other.Lpos)
 	}

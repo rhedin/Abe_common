@@ -53,15 +53,15 @@ func (n *ASTNode) instance(p *parser, t *LexToken) *ASTNode {
 Equal checks if this AST data equals another AST data. Returns also a message describing
 what is the found difference.
 */
-func (n *ASTNode) Equals(other *ASTNode) (bool, string) {
-	return n.equalsPath(n.Name, other)
+func (n *ASTNode) Equals(other *ASTNode, ignoreTokenPosition bool) (bool, string) {
+	return n.equalsPath(n.Name, other, ignoreTokenPosition)
 }
 
 /*
 equalsPath checks if this AST data equals another AST data while preserving the search path.
 Returns also a message describing what is the found difference.
 */
-func (n *ASTNode) equalsPath(path string, other *ASTNode) (bool, string) {
+func (n *ASTNode) equalsPath(path string, other *ASTNode, ignoreTokenPosition bool) (bool, string) {
 	var res = true
 	var msg = ""
 
@@ -70,7 +70,7 @@ func (n *ASTNode) equalsPath(path string, other *ASTNode) (bool, string) {
 		msg = fmt.Sprintf("Name is different %v vs %v\n", n.Name, other.Name)
 	}
 
-	if ok, tokenMSG := n.Token.Equals(*other.Token); !ok {
+	if ok, tokenMSG := n.Token.Equals(*other.Token, ignoreTokenPosition); !ok {
 		res = false
 		msg += fmt.Sprintf("Token is different:\n%v\n", tokenMSG)
 	}
@@ -85,7 +85,7 @@ func (n *ASTNode) equalsPath(path string, other *ASTNode) (bool, string) {
 			// Check for different in children
 
 			if ok, childMSG := child.equalsPath(fmt.Sprintf("%v > %v", path, child.Name),
-				other.Children[i]); !ok {
+				other.Children[i], ignoreTokenPosition); !ok {
 				return ok, childMSG
 			}
 		}

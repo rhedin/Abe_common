@@ -14,6 +14,21 @@ import (
 	"testing"
 )
 
+func TestCommentParsing(t *testing.T) {
+
+	// TODO: Comment parsing
+
+	//	input := `/* This
+	//	is  a comment */ a := 1 + 1 # foo bar`
+	/*
+		if _, err := UnitTestParse("mytest", input); err.Error() !=
+			"Parse error in mytest: Lexical error (invalid syntax while parsing string) (Line:1 Pos:1)" {
+			t.Error(err)
+			return
+		}
+	*/
+}
+
 func TestSimpleExpressionParsing(t *testing.T) {
 
 	// Test error output
@@ -115,6 +130,8 @@ plus
 		return
 	}
 
+	// Test needless brackets
+
 	input = "(a + 1) * (5 / (6 - 2))"
 	expectedOutput = `
 times
@@ -128,7 +145,10 @@ times
       number: 2
 `[1:]
 
-	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+	// Pretty printer should get rid of the needless brackets
+
+	res, err := UnitTestParseWithPPResult("mytest", input, "(a + 1) * 5 / (6 - 2)")
+	if err != nil || fmt.Sprint(res) != expectedOutput {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
 		return
 	}
@@ -156,7 +176,9 @@ or
       identifier: test
 `[1:]
 
-	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+	res, err := UnitTestParseWithPPResult("mytest", input, "not (a + 1) * 5 and true == false or not 1 - 5 != test")
+
+	if err != nil || fmt.Sprint(res) != expectedOutput {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
 		return
 	}
@@ -188,7 +210,9 @@ or
     number: 10
 `[1:]
 
-	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+	res, err = UnitTestParseWithPPResult("mytest", input, `a > b or a <= p or b hassuffix "test" or c hasprefix "test" and x < 4 or x >= 10`)
+
+	if err != nil || fmt.Sprint(res) != expectedOutput {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
 		return
 	}
