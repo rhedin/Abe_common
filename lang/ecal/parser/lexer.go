@@ -36,6 +36,20 @@ type LexToken struct {
 }
 
 /*
+NewLexTokenInstance creates a new LexToken object instance from given LexToken values.
+*/
+func NewLexTokenInstance(t LexToken) *LexToken {
+	return &LexToken{
+		t.ID,
+		t.Pos,
+		t.Val,
+		t.Identifier,
+		t.Lline,
+		t.Lpos,
+	}
+}
+
+/*
 Equal checks if this LexToken equals another LexToken. Returns also a message describing
 what is the found difference.
 */
@@ -112,8 +126,11 @@ func (t LexToken) String() string {
 	case t.ID == TokenError:
 		return fmt.Sprintf("Error: %s (%s)", t.Val, t.PosString())
 
-	case t.ID == TokenCOMMENT:
-		return fmt.Sprintf("c:'%s'", t.Val)
+	case t.ID == TokenPRECOMMENT:
+		return fmt.Sprintf("/* %s */", t.Val)
+
+	case t.ID == TokenPOSTCOMMENT:
+		return fmt.Sprintf("# %s", t.Val)
 
 	case t.ID > TOKENodeSYMBOLS && t.ID < TOKENodeKEYWORDS:
 		return fmt.Sprintf("%s", strings.ToUpper(t.Val))
@@ -667,7 +684,7 @@ func lexComment(l *lexer) lexFunc {
 			r = l.next(0)
 		}
 
-		l.emitTokenAndValue(TokenCOMMENT, l.input[l.start:l.pos-1], false)
+		l.emitTokenAndValue(TokenPOSTCOMMENT, l.input[l.start:l.pos], false)
 
 		if r == RuneEOF {
 			return nil
@@ -700,7 +717,7 @@ func lexComment(l *lexer) lexFunc {
 			}
 		}
 
-		l.emitTokenAndValue(TokenCOMMENT, l.input[l.start:l.pos-1], false)
+		l.emitTokenAndValue(TokenPRECOMMENT, l.input[l.start:l.pos-1], false)
 
 		// Consume final /
 

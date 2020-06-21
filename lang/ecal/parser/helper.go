@@ -25,10 +25,11 @@ import (
 ASTNode models a node in the AST
 */
 type ASTNode struct {
-	Name     string     // Name of the node
-	Token    *LexToken  // Lexer token of this ASTNode
-	Children []*ASTNode // Child nodes
-	Runtime  Runtime    // Runtime component for this ASTNode
+	Name     string      // Name of the node
+	Token    *LexToken   // Lexer token of this ASTNode
+	Meta     []*LexToken // Meta data for this ASTNode (e.g. comments)
+	Children []*ASTNode  // Child nodes
+	Runtime  Runtime     // Runtime component for this ASTNode
 
 	binding        int                                                             // Binding power of this node
 	nullDenotation func(p *parser, self *ASTNode) (*ASTNode, error)                // Configure token as beginning node
@@ -40,7 +41,7 @@ Create a new instance of this ASTNode which is connected to a concrete lexer tok
 */
 func (n *ASTNode) instance(p *parser, t *LexToken) *ASTNode {
 
-	ret := &ASTNode{n.Name, t, make([]*ASTNode, 0, 2), nil, n.binding, n.nullDenotation, n.leftDenotation}
+	ret := &ASTNode{n.Name, t, nil, make([]*ASTNode, 0, 2), nil, n.binding, n.nullDenotation, n.leftDenotation}
 
 	if p.rp != nil {
 		ret.Runtime = p.rp.Runtime(ret)
@@ -121,9 +122,7 @@ func (n *ASTNode) levelString(indent int, buf *bytes.Buffer, printChildren int) 
 
 	buf.WriteString(stringutil.GenerateRollingString(" ", indent*2))
 
-	if n.Name == NodeCOMMENT {
-		buf.WriteString(fmt.Sprintf("%v: %20v", n.Name, n.Token.Val))
-	} else if n.Name == NodeSTRING {
+	if n.Name == NodeSTRING {
 		buf.WriteString(fmt.Sprintf("%v: '%v'", n.Name, n.Token.Val))
 	} else if n.Name == NodeNUMBER {
 		buf.WriteString(fmt.Sprintf("%v: %v", n.Name, n.Token.Val))
@@ -131,6 +130,16 @@ func (n *ASTNode) levelString(indent int, buf *bytes.Buffer, printChildren int) 
 		buf.WriteString(fmt.Sprintf("%v: %v", n.Name, n.Token.Val))
 	} else {
 		buf.WriteString(n.Name)
+	}
+
+	if len(n.Meta) > 0 {
+		buf.WriteString(" # ")
+		for i, c := range n.Meta {
+			buf.WriteString(c.Val)
+			if i < len(n.Meta)-1 {
+				buf.WriteString(" ")
+			}
+		}
 	}
 
 	buf.WriteString("\n")
@@ -280,7 +289,7 @@ func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
 		linepos,            // Lpos
 	}
 
-	return &ASTNode{fmt.Sprint(name), token, astChildren, nil, 0, nil, nil}, nil
+	return &ASTNode{fmt.Sprint(name), token, nil, astChildren, nil, 0, nil, nil}, nil
 }
 
 // Look ahead buffer

@@ -14,25 +14,25 @@ import (
 )
 
 /*
-Map of AST nodes corresponding to lexer tokens
+Map of AST nodes corresponding to lexer tokens. The map determines how a given
+sequence of lexer tokens are organized into an AST.
 */
 var astNodeMap map[LexTokenID]*ASTNode
 
 func init() {
 	astNodeMap = map[LexTokenID]*ASTNode{
-		TokenEOF: {NodeEOF, nil, nil, nil, 0, ndTerm, nil},
+		TokenEOF: {NodeEOF, nil, nil, nil, nil, 0, ndTerm, nil},
 
 		// Value tokens
 
-		TokenCOMMENT:    {NodeCOMMENT, nil, nil, nil, 0, ndTerm, nil},
-		TokenSTRING:     {NodeSTRING, nil, nil, nil, 0, ndTerm, nil},
-		TokenNUMBER:     {NodeNUMBER, nil, nil, nil, 0, ndTerm, nil},
-		TokenIDENTIFIER: {NodeIDENTIFIER, nil, nil, nil, 0, ndTerm, nil},
+		TokenSTRING:     {NodeSTRING, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenNUMBER:     {NodeNUMBER, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenIDENTIFIER: {NodeIDENTIFIER, nil, nil, nil, nil, 0, ndTerm, nil},
 
 		// Constructed tokens
 
-		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, 0, nil, nil},
-		TokenSEMICOLON:  {"", nil, nil, nil, 0, nil, nil},
+		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, nil, 0, nil, nil},
+		TokenSEMICOLON:  {"", nil, nil, nil, nil, 0, nil, nil},
 		/*
 			TokenLIST:       {NodeLIST, nil, nil, nil, 0, nil, nil},
 			TokenMAP:        {NodeMAP, nil, nil, nil, 0, nil, nil},
@@ -41,52 +41,52 @@ func init() {
 
 		// Grouping symbols
 
-		TokenLPAREN: {"", nil, nil, nil, 150, ndInner, nil},
-		TokenRPAREN: {"", nil, nil, nil, 0, nil, nil},
+		TokenLPAREN: {"", nil, nil, nil, nil, 150, ndInner, nil},
+		TokenRPAREN: {"", nil, nil, nil, nil, 0, nil, nil},
 
 		// Separators
 
-		TokenCOMMA: {"", nil, nil, nil, 0, nil, nil},
+		TokenCOMMA: {"", nil, nil, nil, nil, 0, nil, nil},
 
 		// Assignment statement
 
-		TokenASSIGN: {NodeASSIGN, nil, nil, nil, 10, nil, ldInfix},
+		TokenASSIGN: {NodeASSIGN, nil, nil, nil, nil, 10, nil, ldInfix},
 
 		// Simple arithmetic expressions
 
-		TokenPLUS:   {NodePLUS, nil, nil, nil, 110, ndPrefix, ldInfix},
-		TokenMINUS:  {NodeMINUS, nil, nil, nil, 110, ndPrefix, ldInfix},
-		TokenTIMES:  {NodeTIMES, nil, nil, nil, 120, nil, ldInfix},
-		TokenDIV:    {NodeDIV, nil, nil, nil, 120, nil, ldInfix},
-		TokenDIVINT: {NodeDIVINT, nil, nil, nil, 120, nil, ldInfix},
-		TokenMODINT: {NodeMODINT, nil, nil, nil, 120, nil, ldInfix},
+		TokenPLUS:   {NodePLUS, nil, nil, nil, nil, 110, ndPrefix, ldInfix},
+		TokenMINUS:  {NodeMINUS, nil, nil, nil, nil, 110, ndPrefix, ldInfix},
+		TokenTIMES:  {NodeTIMES, nil, nil, nil, nil, 120, nil, ldInfix},
+		TokenDIV:    {NodeDIV, nil, nil, nil, nil, 120, nil, ldInfix},
+		TokenDIVINT: {NodeDIVINT, nil, nil, nil, nil, 120, nil, ldInfix},
+		TokenMODINT: {NodeMODINT, nil, nil, nil, nil, 120, nil, ldInfix},
 
 		// Boolean operators
 
-		TokenOR:  {NodeOR, nil, nil, nil, 30, nil, ldInfix},
-		TokenAND: {NodeAND, nil, nil, nil, 40, nil, ldInfix},
-		TokenNOT: {NodeNOT, nil, nil, nil, 20, ndPrefix, nil},
+		TokenOR:  {NodeOR, nil, nil, nil, nil, 30, nil, ldInfix},
+		TokenAND: {NodeAND, nil, nil, nil, nil, 40, nil, ldInfix},
+		TokenNOT: {NodeNOT, nil, nil, nil, nil, 20, ndPrefix, nil},
 
 		// Condition operators
 
-		TokenLIKE:      {NodeLIKE, nil, nil, nil, 60, nil, ldInfix},
-		TokenIN:        {NodeIN, nil, nil, nil, 60, nil, ldInfix},
-		TokenHASPREFIX: {NodeHASPREFIX, nil, nil, nil, 60, nil, ldInfix},
-		TokenHASSUFFIX: {NodeHASSUFFIX, nil, nil, nil, 60, nil, ldInfix},
-		TokenNOTIN:     {NodeNOTIN, nil, nil, nil, 60, nil, ldInfix},
+		TokenLIKE:      {NodeLIKE, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenIN:        {NodeIN, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenHASPREFIX: {NodeHASPREFIX, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenHASSUFFIX: {NodeHASSUFFIX, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenNOTIN:     {NodeNOTIN, nil, nil, nil, nil, 60, nil, ldInfix},
 
-		TokenGEQ: {NodeGEQ, nil, nil, nil, 60, nil, ldInfix},
-		TokenLEQ: {NodeLEQ, nil, nil, nil, 60, nil, ldInfix},
-		TokenNEQ: {NodeNEQ, nil, nil, nil, 60, nil, ldInfix},
-		TokenEQ:  {NodeEQ, nil, nil, nil, 60, nil, ldInfix},
-		TokenGT:  {NodeGT, nil, nil, nil, 60, nil, ldInfix},
-		TokenLT:  {NodeLT, nil, nil, nil, 60, nil, ldInfix},
+		TokenGEQ: {NodeGEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenLEQ: {NodeLEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenNEQ: {NodeNEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenEQ:  {NodeEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenGT:  {NodeGT, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenLT:  {NodeLT, nil, nil, nil, nil, 60, nil, ldInfix},
 
 		// Constants
 
-		TokenFALSE: {NodeFALSE, nil, nil, nil, 0, ndTerm, nil},
-		TokenTRUE:  {NodeTRUE, nil, nil, nil, 0, ndTerm, nil},
-		TokenNULL:  {NodeNULL, nil, nil, nil, 0, ndTerm, nil},
+		TokenFALSE: {NodeFALSE, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenTRUE:  {NodeTRUE, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenNULL:  {NodeNULL, nil, nil, nil, nil, 0, ndTerm, nil},
 	}
 }
 
@@ -232,8 +232,24 @@ func (p *parser) run(rightBinding int) (*ASTNode, error) {
 next retrieves the next lexer token.
 */
 func (p *parser) next() (*ASTNode, error) {
+	var preComments []*LexToken
+	var postComments []*LexToken
 
 	token, more := p.tokens.Next()
+
+	// Skip over pre comment token
+
+	for more && token.ID == TokenPRECOMMENT {
+		preComments = append(preComments, NewLexTokenInstance(token))
+		token, more = p.tokens.Next()
+	}
+
+	// Skip over post comment token
+
+	for more && token.ID == TokenPOSTCOMMENT {
+		postComments = append(postComments, NewLexTokenInstance(token))
+		token, more = p.tokens.Next()
+	}
 
 	if !more {
 
@@ -251,7 +267,14 @@ func (p *parser) next() (*ASTNode, error) {
 
 		// We got a normal AST component
 
-		return node.instance(p, &token), nil
+		ret := node.instance(p, &token)
+
+		ret.Meta = append(ret.Meta, preComments...) // Attach pre comments to the next AST node
+		if len(postComments) > 0 && p.node != nil {
+			p.node.Meta = append(p.node.Meta, postComments...) // Attach post comments to the previous AST node
+		}
+
+		return ret, nil
 	}
 
 	return nil, p.newParserError(ErrUnknownToken, fmt.Sprintf("id:%v (%v)", token.ID, token), token)

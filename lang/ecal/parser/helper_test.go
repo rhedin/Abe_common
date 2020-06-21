@@ -34,7 +34,7 @@ Pos is different 2 vs 1
 Val is different 1 vs 2
 Lpos is different 3 vs 2
 {
-  "ID": 5,
+  "ID": 6,
   "Pos": 2,
   "Val": "1",
   "Identifier": false,
@@ -43,7 +43,7 @@ Lpos is different 3 vs 2
 }
 vs
 {
-  "ID": 5,
+  "ID": 6,
   "Pos": 1,
   "Val": "2",
   "Identifier": false,
@@ -76,11 +76,11 @@ number: 2
 
 Name is different number vs identifier
 Token is different:
-ID is different 5 vs 6
+ID is different 6 vs 7
 Val is different 1 vs a
 Identifier is different false vs true
 {
-  "ID": 5,
+  "ID": 6,
   "Pos": 1,
   "Val": "1",
   "Identifier": false,
@@ -89,7 +89,7 @@ Identifier is different false vs true
 }
 vs
 {
-  "ID": 6,
+  "ID": 7,
   "Pos": 1,
   "Val": "a",
   "Identifier": true,

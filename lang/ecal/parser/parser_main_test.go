@@ -16,17 +16,21 @@ import (
 
 func TestCommentParsing(t *testing.T) {
 
-	// TODO: Comment parsing
+	// Comment parsing without statements
 
-	//	input := `/* This
-	//	is  a comment */ a := 1 + 1 # foo bar`
-	/*
-		if _, err := UnitTestParse("mytest", input); err.Error() !=
-			"Parse error in mytest: Lexical error (invalid syntax while parsing string) (Line:1 Pos:1)" {
-			t.Error(err)
-			return
-		}
-	*/
+	input := `/* This is  a comment*/ a := 1 + 1 # foo bar`
+	expectedOutput := `
+:=
+  identifier: a #  This is  a comment
+  plus
+    number: 1
+    number: 1 #  foo bar
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
 }
 
 func TestSimpleExpressionParsing(t *testing.T) {

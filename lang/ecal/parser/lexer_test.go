@@ -62,14 +62,14 @@ func TestNextItem(t *testing.T) {
 func TestEquals(t *testing.T) {
 	l := LexToList("mytest", "not\n test")
 
-	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 46 vs 6
+	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 47 vs 7
 Pos is different 0 vs 5
 Val is different not vs test
 Identifier is different false vs true
 Lline is different 1 vs 2
 Lpos is different 1 vs 2
 {
-  "ID": 46,
+  "ID": 47,
   "Pos": 0,
   "Val": "not",
   "Identifier": false,
@@ -78,7 +78,7 @@ Lpos is different 1 vs 2
 }
 vs
 {
-  "ID": 6,
+  "ID": 7,
   "Pos": 5,
   "Val": "test",
   "Identifier": true,
@@ -248,9 +248,9 @@ func TestCommentLexing(t *testing.T) {
 	input := `name /* foo
 		bar
 	x*/ 'b/* - */la' /*test*/`
-	if res := LexToList("mytest", input); fmt.Sprint(res) != `["name" c:' foo
+	if res := LexToList("mytest", input); fmt.Sprint(res) != `["name" /*  foo
 		bar
-	x' "b/* - */la" c:'test' EOF]` {
+	x */ "b/* - */la" /* test */ EOF]` {
 		t.Error("Unexpected lexer result:", res)
 		return
 	}
@@ -265,17 +265,17 @@ func TestCommentLexing(t *testing.T) {
 	input = `foo
    1+ 2 # Some comment
 bar`
-	if res := LexToList("mytest", input); fmt.Sprint(res) != `["foo" v:"1" + v:"2" c:' Some comment' "bar" EOF]` {
+	if res := LexToList("mytest", input); fmt.Sprint(res) != `["foo" v:"1" + v:"2" #  Some comment
+ "bar" EOF]` {
 		t.Error("Unexpected lexer result:", res)
 		return
 	}
 
 	input = `1+ 2 # Some comment`
-	if res := LexToList("mytest", input); fmt.Sprint(res) != `[v:"1" + v:"2" c:' Some commen' EOF]` {
+	if res := LexToList("mytest", input); fmt.Sprint(res) != `[v:"1" + v:"2" #  Some comment EOF]` {
 		t.Error("Unexpected lexer result:", res)
 		return
 	}
-
 }
 
 func TestSinkLexing(t *testing.T) {
