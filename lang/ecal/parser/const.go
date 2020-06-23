@@ -46,6 +46,15 @@ LexTokenID represents a unique lexer token ID
 type LexTokenID int
 
 /*
+Available meta data types
+*/
+const (
+	MetaDataPreComment  = "MetaDataPreComment"
+	MetaDataPostComment = "MetaDataPostComment"
+	MetaDataGeneral     = "MetaDataGeneral"
+)
+
+/*
 Available lexer token types
 */
 const (

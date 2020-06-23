@@ -22,14 +22,52 @@ import (
 // =========
 
 /*
+MetaData is auxiliary data which can be attached to ASTs.
+*/
+type MetaData interface {
+
+	/*
+		Type returns the type of the meta data.
+	*/
+	Type() string
+
+	/*
+		Value returns the value of the meta data.
+	*/
+	Value() string
+}
+
+/*
+metaData is a minimal MetaData implementation.
+*/
+type metaData struct {
+	metatype  string
+	metavalue string
+}
+
+/*
+Type returns the type of the meta data.
+*/
+func (m *metaData) Type() string {
+	return m.metatype
+}
+
+/*
+Value returns the value of the meta data.
+*/
+func (m *metaData) Value() string {
+	return m.metavalue
+}
+
+/*
 ASTNode models a node in the AST
 */
 type ASTNode struct {
-	Name     string      // Name of the node
-	Token    *LexToken   // Lexer token of this ASTNode
-	Meta     []*LexToken // Meta data for this ASTNode (e.g. comments)
-	Children []*ASTNode  // Child nodes
-	Runtime  Runtime     // Runtime component for this ASTNode
+	Name     string     // Name of the node
+	Token    *LexToken  // Lexer token of this ASTNode
+	Meta     []MetaData // Meta data for this ASTNode (e.g. comments)
+	Children []*ASTNode // Child nodes
+	Runtime  Runtime    // Runtime component for this ASTNode
 
 	binding        int                                                             // Binding power of this node
 	nullDenotation func(p *parser, self *ASTNode) (*ASTNode, error)                // Configure token as beginning node
@@ -74,6 +112,25 @@ func (n *ASTNode) equalsPath(path string, other *ASTNode, ignoreTokenPosition bo
 	if ok, tokenMSG := n.Token.Equals(*other.Token, ignoreTokenPosition); !ok {
 		res = false
 		msg += fmt.Sprintf("Token is different:\n%v\n", tokenMSG)
+	}
+
+	if len(n.Meta) != len(other.Meta) {
+		res = false
+		msg = fmt.Sprintf("Number of meta data entries is different %v vs %v\n",
+			len(n.Meta), len(other.Meta))
+	} else {
+		for i, meta := range n.Meta {
+
+			// Check for different in meta entries
+
+			if meta.Type() != other.Meta[i].Type() {
+				res = false
+				msg += fmt.Sprintf("Meta data type is different %v vs %v\n", meta.Type(), other.Meta[i].Type())
+			} else if meta.Value() != other.Meta[i].Value() {
+				res = false
+				msg += fmt.Sprintf("Meta data value is different %v vs %v\n", meta.Value(), other.Meta[i].Value())
+			}
+		}
 	}
 
 	if len(n.Children) != len(other.Children) {
@@ -135,7 +192,7 @@ func (n *ASTNode) levelString(indent int, buf *bytes.Buffer, printChildren int) 
 	if len(n.Meta) > 0 {
 		buf.WriteString(" # ")
 		for i, c := range n.Meta {
-			buf.WriteString(c.Val)
+			buf.WriteString(c.Value())
 			if i < len(n.Meta)-1 {
 				buf.WriteString(" ")
 			}
@@ -165,6 +222,20 @@ func (n *ASTNode) ToJSONObject() map[string]interface{} {
 	ret := make(map[string]interface{})
 
 	ret["name"] = n.Name
+
+	lenMeta := len(n.Meta)
+
+	if lenMeta > 0 {
+		meta := make([]map[string]interface{}, lenMeta)
+		for i, metaChild := range n.Meta {
+			meta[i] = map[string]interface{}{
+				"type":  metaChild.Type(),
+				"value": metaChild.Value(),
+			}
+		}
+
+		ret["meta"] = meta
+	}
 
 	lenChildren := len(n.Children)
 
@@ -209,6 +280,7 @@ The following nested map structure is expected:
 	}
 */
 func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
+	var astMeta []MetaData
 	var astChildren []*ASTNode
 	var nodeID LexTokenID = TokenANY
 	var pos, line, linepos int
@@ -252,6 +324,29 @@ func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
 		linepos = 0
 	}
 
+	// Create meta data
+
+	if meta, ok := jsonAST["meta"]; ok {
+
+		if ic, ok := meta.([]interface{}); ok {
+
+			// Do a list conversion if necessary - this is necessary when we parse
+			// JSON with map[string]interface{}
+
+			metaList := make([]map[string]interface{}, len(ic))
+			for i := range ic {
+				metaList[i] = ic[i].(map[string]interface{})
+			}
+
+			meta = metaList
+		}
+
+		for _, metaChild := range meta.([]map[string]interface{}) {
+			astMeta = append(astMeta, &metaData{
+				fmt.Sprint(metaChild["type"]), fmt.Sprint(metaChild["value"])})
+		}
+	}
+
 	// Create children
 
 	if children, ok := jsonAST["children"]; ok {
@@ -289,7 +384,7 @@ func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
 		linepos,            // Lpos
 	}
 
-	return &ASTNode{fmt.Sprint(name), token, nil, astChildren, nil, 0, nil, nil}, nil
+	return &ASTNode{fmt.Sprint(name), token, astMeta, astChildren, nil, 0, nil, nil}, nil
 }
 
 // Look ahead buffer

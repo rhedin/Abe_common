@@ -148,6 +148,27 @@ func (t LexToken) String() string {
 	return fmt.Sprintf("%s%q", prefix, t.Val)
 }
 
+// Meta data interface
+
+/*
+Type returns the meta data type.
+*/
+func (t LexToken) Type() string {
+	if t.ID == TokenPRECOMMENT {
+		return MetaDataPreComment
+	} else if t.ID == TokenPOSTCOMMENT {
+		return MetaDataPostComment
+	}
+	return MetaDataGeneral
+}
+
+/*
+Value returns the meta data value.
+*/
+func (t LexToken) Value() string {
+	return t.Val
+}
+
 /*
 KeywordMap is a map of keywords - these require spaces between them
 */

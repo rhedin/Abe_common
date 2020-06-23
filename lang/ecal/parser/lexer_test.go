@@ -18,7 +18,9 @@ func TestNextItem(t *testing.T) {
 
 	l := &lexer{"Test", "1234", 0, 0, 0, 0, 0, make(chan LexToken)}
 
-	if r := l.next(1); r != '1' {
+	r := l.next(1)
+
+	if r != '1' {
 		t.Errorf("Unexpected token: %q", r)
 		return
 	}
@@ -61,6 +63,11 @@ func TestNextItem(t *testing.T) {
 
 func TestEquals(t *testing.T) {
 	l := LexToList("mytest", "not\n test")
+
+	if mt := l[0].Type(); mt != "MetaDataGeneral" {
+		t.Error("Unexpected meta type:", mt)
+		return
+	}
 
 	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 47 vs 7
 Pos is different 0 vs 5

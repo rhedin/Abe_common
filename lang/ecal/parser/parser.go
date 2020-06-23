@@ -232,8 +232,8 @@ func (p *parser) run(rightBinding int) (*ASTNode, error) {
 next retrieves the next lexer token.
 */
 func (p *parser) next() (*ASTNode, error) {
-	var preComments []*LexToken
-	var postComments []*LexToken
+	var preComments []MetaData
+	var postComments []MetaData
 
 	token, more := p.tokens.Next()
 

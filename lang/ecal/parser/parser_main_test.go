@@ -31,6 +31,16 @@ func TestCommentParsing(t *testing.T) {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
 		return
 	}
+
+	input = `/* foo */ 1 # foo bar`
+	expectedOutput = `
+number: 1 #  foo   foo bar
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
 }
 
 func TestSimpleExpressionParsing(t *testing.T) {

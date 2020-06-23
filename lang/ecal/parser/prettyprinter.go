@@ -147,7 +147,21 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 
 		errorutil.AssertOk(temp.Execute(&buf, tempParam))
 
-		return buf.String(), nil
+		ret := buf.String()
+
+		// Add meta data
+
+		if len(ast.Meta) > 0 {
+			for _, meta := range ast.Meta {
+				if meta.Type() == MetaDataPreComment {
+					ret = fmt.Sprintf("/*%v*/ %v", meta.Value(), ret)
+				} else if meta.Type() == MetaDataPostComment {
+					ret = fmt.Sprintf("%v #%v", ret, meta.Value())
+				}
+			}
+		}
+
+		return ret, nil
 	}
 
 	return visit(ast, 0)

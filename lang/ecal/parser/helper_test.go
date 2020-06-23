@@ -134,6 +134,101 @@ minus
 		return
 	}
 
+	n, err = ParseWithRuntime("", "-1 #test", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	n2, err = ParseWithRuntime("", "-1", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	if ok, msg := n.Equals(n2, false); ok || msg != `Path to difference: minus > number
+
+Number of meta data entries is different 1 vs 0
+
+AST Nodes:
+number: 1 # test
+vs
+number: 1
+` {
+		t.Error("Unexpected result: ", msg)
+		return
+	}
+
+	n, err = ParseWithRuntime("", "-1 #test", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	n2, err = ParseWithRuntime("", "-1 #wurst", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	if ok, msg := n.Equals(n2, false); ok || msg != `Path to difference: minus > number
+
+Meta data value is different test vs wurst
+
+AST Nodes:
+number: 1 # test
+vs
+number: 1 # wurst
+` {
+		t.Error("Unexpected result: ", msg)
+		return
+	}
+
+	n, err = ParseWithRuntime("", "1 #test", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	n2, err = ParseWithRuntime("", "/*test*/ 1", &DummyRuntimeProvider{})
+	if err != nil {
+		t.Error("Cannot parse test AST:", err)
+		return
+	}
+
+	if ok, msg := n.Equals(n2, false); ok || msg != `Path to difference: number
+
+Token is different:
+Pos is different 0 vs 9
+Lpos is different 1 vs 10
+{
+  "ID": 6,
+  "Pos": 0,
+  "Val": "1",
+  "Identifier": false,
+  "Lline": 1,
+  "Lpos": 1
+}
+vs
+{
+  "ID": 6,
+  "Pos": 9,
+  "Val": "1",
+  "Identifier": false,
+  "Lline": 1,
+  "Lpos": 10
+}
+Meta data type is different MetaDataPostComment vs MetaDataPreComment
+
+AST Nodes:
+number: 1 # test
+vs
+number: 1 # test
+` {
+		t.Error("Unexpected result: ", msg)
+		return
+	}
+
 	// Test building an AST from an invalid
 
 	if _, err := ASTFromJSONObject(map[string]interface{}{
