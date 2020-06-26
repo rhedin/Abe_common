@@ -109,9 +109,11 @@ func (n *ASTNode) equalsPath(path string, other *ASTNode, ignoreTokenPosition bo
 		msg = fmt.Sprintf("Name is different %v vs %v\n", n.Name, other.Name)
 	}
 
-	if ok, tokenMSG := n.Token.Equals(*other.Token, ignoreTokenPosition); !ok {
-		res = false
-		msg += fmt.Sprintf("Token is different:\n%v\n", tokenMSG)
+	if n.Token != nil && other.Token != nil {
+		if ok, tokenMSG := n.Token.Equals(*other.Token, ignoreTokenPosition); !ok {
+			res = false
+			msg += fmt.Sprintf("Token is different:\n%v\n", tokenMSG)
+		}
 	}
 
 	if len(n.Meta) != len(other.Meta) {

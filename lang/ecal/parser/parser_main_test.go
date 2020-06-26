@@ -14,6 +14,31 @@ import (
 	"testing"
 )
 
+func TestStatementParsing(t *testing.T) {
+
+	// Comment parsing without statements
+
+	input := `a := 1
+	b := 2; c:= 3`
+	expectedOutput := `
+statements
+  :=
+    identifier: a
+    number: 1
+  :=
+    identifier: b
+    number: 2
+  :=
+    identifier: c
+    number: 3
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}
+
 func TestCommentParsing(t *testing.T) {
 
 	// Comment parsing without statements

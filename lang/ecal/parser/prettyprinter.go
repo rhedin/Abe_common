@@ -16,6 +16,7 @@ import (
 	"text/template"
 
 	"devt.de/krotik/common/errorutil"
+	"devt.de/krotik/common/stringutil"
 )
 
 /*
@@ -35,9 +36,12 @@ func init() {
 		NodeNUMBER:     template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
 		NodeIDENTIFIER: template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
 
+		// Constructed tokens
+
+		// NodeSTATEMENTS - Special case (handled in code)
+
 		/*
 
-			// Constructed tokens
 
 			NodeSTATEMENTS = "statements" // List of statements
 
@@ -103,13 +107,14 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 
 	visit = func(ast *ASTNode, level int) (string, error) {
 		var buf bytes.Buffer
+		var numChildren = len(ast.Children)
 
 		tempKey := ast.Name
 		tempParam := make(map[string]string)
 
 		// First pretty print children
 
-		if len(ast.Children) > 0 {
+		if numChildren > 0 {
 			for i, child := range ast.Children {
 				res, err := visit(child, level+1)
 				if err != nil {
@@ -130,10 +135,29 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			tempKey += fmt.Sprint("_", len(tempParam))
 		}
 
-		// Adding node value to template parameters
+		// Handle special cases requiring children
 
-		tempParam["val"] = ast.Token.Val
-		tempParam["qval"] = strconv.Quote(ast.Token.Val)
+		if ast.Name == NodeSTATEMENTS {
+
+			// For statements just concat all children
+
+			for i := 0; i < numChildren; i++ {
+				buf.WriteString(stringutil.GenerateRollingString(" ", level*4))
+				buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
+				buf.WriteString("\n")
+			}
+
+			return buf.String(), nil
+
+		}
+
+		if ast.Token != nil {
+
+			// Adding node value to template parameters
+
+			tempParam["val"] = ast.Token.Val
+			tempParam["qval"] = strconv.Quote(ast.Token.Val)
+		}
 
 		// Retrieve the template
 
