@@ -69,14 +69,14 @@ func TestEquals(t *testing.T) {
 		return
 	}
 
-	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 47 vs 7
+	if ok, msg := l[0].Equals(l[1], false); ok || msg != `ID is different 48 vs 7
 Pos is different 0 vs 5
 Val is different not vs test
 Identifier is different false vs true
 Lline is different 1 vs 2
 Lpos is different 1 vs 2
 {
-  "ID": 47,
+  "ID": 48,
   "Pos": 0,
   "Val": "not",
   "Identifier": false,

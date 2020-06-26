@@ -27,17 +27,25 @@ func init() {
 
 		TokenSTRING:     {NodeSTRING, nil, nil, nil, nil, 0, ndTerm, nil},
 		TokenNUMBER:     {NodeNUMBER, nil, nil, nil, nil, 0, ndTerm, nil},
-		TokenIDENTIFIER: {NodeIDENTIFIER, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenIDENTIFIER: {NodeIDENTIFIER, nil, nil, nil, nil, 0, ndIdentifier, nil},
 
 		// Constructed tokens
 
 		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, nil, 0, nil, nil},
-		TokenSEMICOLON:  {"", nil, nil, nil, nil, 0, nil, nil},
 		/*
 			TokenLIST:       {NodeLIST, nil, nil, nil, 0, nil, nil},
 			TokenMAP:        {NodeMAP, nil, nil, nil, 0, nil, nil},
 			TokenGUARD:      {NodeGUARD, nil, nil, nil, 0, nil, nil},
 		*/
+
+		// Condition operators
+
+		TokenGEQ: {NodeGEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenLEQ: {NodeLEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenNEQ: {NodeNEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenEQ:  {NodeEQ, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenGT:  {NodeGT, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenLT:  {NodeLT, nil, nil, nil, nil, 60, nil, ldInfix},
 
 		// Grouping symbols
 
@@ -46,13 +54,11 @@ func init() {
 
 		// Separators
 
-		TokenCOMMA: {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenDOT:       {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenCOMMA:     {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenSEMICOLON: {"", nil, nil, nil, nil, 0, nil, nil},
 
-		// Assignment statement
-
-		TokenASSIGN: {NodeASSIGN, nil, nil, nil, nil, 10, nil, ldInfix},
-
-		// Simple arithmetic expressions
+		// Arithmetic operators
 
 		TokenPLUS:   {NodePLUS, nil, nil, nil, nil, 110, ndPrefix, ldInfix},
 		TokenMINUS:  {NodeMINUS, nil, nil, nil, nil, 110, ndPrefix, ldInfix},
@@ -60,6 +66,15 @@ func init() {
 		TokenDIV:    {NodeDIV, nil, nil, nil, nil, 120, nil, ldInfix},
 		TokenDIVINT: {NodeDIVINT, nil, nil, nil, nil, 120, nil, ldInfix},
 		TokenMODINT: {NodeMODINT, nil, nil, nil, nil, 120, nil, ldInfix},
+
+		// Assignment statement
+
+		TokenASSIGN: {NodeASSIGN, nil, nil, nil, nil, 10, nil, ldInfix},
+
+		// Import statement
+
+		TokenIMPORT: {NodeIMPORT, nil, nil, nil, nil, 0, ndImport, nil},
+		TokenAS:     {"", nil, nil, nil, nil, 0, ndImport, nil},
 
 		// Boolean operators
 
@@ -75,14 +90,7 @@ func init() {
 		TokenHASSUFFIX: {NodeHASSUFFIX, nil, nil, nil, nil, 60, nil, ldInfix},
 		TokenNOTIN:     {NodeNOTIN, nil, nil, nil, nil, 60, nil, ldInfix},
 
-		TokenGEQ: {NodeGEQ, nil, nil, nil, nil, 60, nil, ldInfix},
-		TokenLEQ: {NodeLEQ, nil, nil, nil, nil, 60, nil, ldInfix},
-		TokenNEQ: {NodeNEQ, nil, nil, nil, nil, 60, nil, ldInfix},
-		TokenEQ:  {NodeEQ, nil, nil, nil, nil, 60, nil, ldInfix},
-		TokenGT:  {NodeGT, nil, nil, nil, nil, 60, nil, ldInfix},
-		TokenLT:  {NodeLT, nil, nil, nil, nil, 60, nil, ldInfix},
-
-		// Constants
+		// Constant terminals
 
 		TokenFALSE: {NodeFALSE, nil, nil, nil, nil, 0, ndTerm, nil},
 		TokenTRUE:  {NodeTRUE, nil, nil, nil, nil, 0, ndTerm, nil},
@@ -323,6 +331,59 @@ func ndPrefix(p *parser, self *ASTNode) (*ASTNode, error) {
 	self.Children = append(self.Children, val)
 
 	return self, nil
+}
+
+// Null denotation functions for specific expressions
+// ==================================================
+
+/*
+ndImport is used to parse imports.
+*/
+func ndImport(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// Must specify a file path
+
+	err := acceptChild(p, self, TokenSTRING)
+
+	if err == nil {
+
+		// Must specify AS
+
+		if err = skipToken(p, TokenAS); err == nil {
+
+			// Must specify an identifier
+
+			err = acceptChild(p, self, TokenIDENTIFIER)
+		}
+	}
+
+	return self, err
+}
+
+/*
+ndIdentifier is to parse identifiers and function calls.
+*/
+func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
+	var err error
+
+	// If the next token is a dot we got a dotted identifier
+	// collect all segments as children with a child being the
+	// parent of the next segment
+
+	if p.node.Token.ID == TokenDOT {
+		parent := self
+		for err == nil && p.node.Token.ID == TokenDOT {
+			if err = skipToken(p, TokenDOT); err == nil {
+				err = acceptChild(p, parent, TokenIDENTIFIER)
+				parent = parent.Children[0]
+			}
+		}
+	}
+
+	// TODO Look at the next token p.node and determine if we need to build
+	// a function call or list/map access
+
+	return self, err
 }
 
 // Standard left denotation functions

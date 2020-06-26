@@ -39,6 +39,36 @@ statements
 	}
 }
 
+func TestIdentifierParsing(t *testing.T) {
+
+	input := `a := 1
+	a.foo := 2
+	a.b.c.foo := a.b
+	`
+	expectedOutput := `
+statements
+  :=
+    identifier: a
+    number: 1
+  :=
+    identifier: a
+      identifier: foo
+    number: 2
+  :=
+    identifier: a
+      identifier: b
+        identifier: c
+          identifier: foo
+    identifier: a
+      identifier: b
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}
+
 func TestCommentParsing(t *testing.T) {
 
 	// Comment parsing without statements

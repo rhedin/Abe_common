@@ -32,9 +32,10 @@ var bracketPrecedenceMap map[string]bool
 func init() {
 	prettyPrinterMap = map[string]*template.Template{
 
-		NodeSTRING:     template.Must(template.New(NodeTRUE).Parse("{{.qval}}")),
-		NodeNUMBER:     template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
-		NodeIDENTIFIER: template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
+		NodeSTRING:            template.Must(template.New(NodeTRUE).Parse("{{.qval}}")),
+		NodeNUMBER:            template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
+		NodeIDENTIFIER:        template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
+		NodeIDENTIFIER + "_1": template.Must(template.New(NodeTRUE).Parse("{{.val}}.{{.c1}}")),
 
 		// Constructed tokens
 
@@ -50,7 +51,13 @@ func init() {
 			NodeASSIGN = ":="
 		*/
 
+		// Assignment statement
+
 		NodeASSIGN + "_2": template.Must(template.New(NodeMINUS).Parse("{{.c1}} := {{.c2}}")),
+
+		// Import statement
+
+		NodeIMPORT + "_2": template.Must(template.New(NodeMINUS).Parse("import {{.c1}} as {{.c2}}")),
 
 		// Arithmetic operators
 

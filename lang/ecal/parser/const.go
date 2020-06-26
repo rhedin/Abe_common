@@ -115,13 +115,14 @@ const (
 
 	TokenASSIGN
 
-	// Data structure access
-
-	TokenACCESS
-
 	// The colon '' has a context specific meaning and is checked by the parser
 
 	TOKENodeKEYWORDS // Used to separate keywords from other tokens in this list
+
+	// Import statement
+
+	TokenIMPORT
+	TokenAS
 
 	// Sink definition
 
@@ -192,9 +193,14 @@ const (
 
 	NodeSTATEMENTS = "statements" // List of statements
 
-	// Assignment statement
+	// Condition operators
 
-	NodeASSIGN = ":="
+	NodeGEQ = ">="
+	NodeLEQ = "<="
+	NodeNEQ = "!="
+	NodeEQ  = "=="
+	NodeGT  = ">"
+	NodeLT  = "<"
 
 	// Arithmetic operators
 
@@ -205,10 +211,18 @@ const (
 	NodeMODINT = "modint"
 	NodeDIVINT = "divint"
 
+	// Assignment statement
+
+	NodeASSIGN = ":="
+
+	// Import statement
+
+	NodeIMPORT = "import"
+
 	// Boolean operators
 
-	NodeOR  = "or"
 	NodeAND = "and"
+	NodeOR  = "or"
 	NodeNOT = "not"
 
 	// Condition operators
@@ -219,14 +233,7 @@ const (
 	NodeHASSUFFIX = "hassuffix"
 	NodeNOTIN     = "notin"
 
-	NodeGEQ = ">="
-	NodeLEQ = "<="
-	NodeNEQ = "!="
-	NodeEQ  = "=="
-	NodeGT  = ">"
-	NodeLT  = "<"
-
-	// Constants
+	// Constant terminals
 
 	NodeTRUE  = "true"
 	NodeFALSE = "false"

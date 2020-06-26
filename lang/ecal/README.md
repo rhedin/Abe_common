@@ -14,6 +14,19 @@ Constant values are usually enclosed in double quotes "" or single quotes '', bo
 
 Blocks are denoted with curley brackets. Most language constructs (conditions, loops, etc.) are very similar to other languages.
 
+Scope and imports
+--
+ECAL is a block scoped language. Everything in ECAL is defined as a symbol within a scope. Scopes form a composition structure in which a given scope can contain multiple inner scopes. Inner scopes can access symbols in outer scopes while outer scopes cannot access symbols defined in inner scopes. A symbol defined in an outer scope can be redefined within the boundaries of an inner scope without modifying the symbol of the outer scope. The widest scope is the global scope which contains all top-level definitions. Sinks, Functions and variables are possible symbols in a scope.
+
+ECAL has import statements which can import ECAL symbol definitions from another file into the current scope. All import locations are relative to the root directory from which all ECAL files are being parsed. It is not possible to import ECAL files relative to the directory of an importing ECAL file.
+
+Example:
+```
+import "foo/bar.ecal" as foobar
+
+foobar.doSomething()
+```
+
 Event Sinks
 --
 Sinks are should have unique names which identify them and the following attributes:
@@ -48,7 +61,7 @@ Events which match
 Events which don't match
 ...
 
-Function
+Functions
 --
 Functions define reusable pieces of code dedicated to perform a particular task based on a set of given input values. In ECAL functions are first-class citizens in that they can be assigned to variables, passed as arguments, immediately invoked or deferred for last execution. Each parameter can have a default value which is by default NULL.
 
@@ -74,9 +87,9 @@ Single line comments will comment all characters after the `#` until the next ne
 a := 1 # Single line comment after a statement
 ```
 
-Constant Values
+Literal Values
 --
-Constant values are used to initialize variables or as operands in expressions.
+Literal values are used to initialize variables or as operands in expressions.
 
 Numbers can be expressed in all common notations:
 Formatting|Description
