@@ -295,9 +295,9 @@ statements
 		return
 	}
 
-	input = `print(123); x := { z : "foo", y : "bar", z : "zzz" }; foo = y == 1`
+	input = `print(123); x := { z : "foo", y : "bar", z : "zzz" }; foo £ y == 1`
 	if _, err := UnitTestParse("mytest", input); err.Error() !=
-		"Parse error in mytest: Lexical error (Cannot parse identifier '='. Identifies may only contain [a-zA-Z] and [a-zA-Z0-9] from the second character) (Line:1 Pos:59)" {
+		"Parse error in mytest: Lexical error (Cannot parse identifier '£'. Identifies may only contain [a-zA-Z] and [a-zA-Z0-9] from the second character) (Line:1 Pos:59)" {
 		t.Error(err)
 		return
 	}

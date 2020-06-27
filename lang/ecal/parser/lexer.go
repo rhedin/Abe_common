@@ -190,7 +190,8 @@ var KeywordMap = map[string]LexTokenID{
 
 	// Function definition
 
-	"func": TokenFUNC,
+	"func":   TokenFUNC,
+	"return": TokenRETURN,
 
 	// Boolean operators
 
@@ -252,12 +253,16 @@ var SymbolMap = map[string]LexTokenID{
 	"{": TokenLBRACE,
 	"}": TokenRBRACE,
 
-	// Sequence symbols
+	// Separators
 
 	".": TokenDOT,
 	",": TokenCOMMA,
-	":": TokenCOLON,
 	";": TokenSEMICOLON,
+
+	// Grouping
+
+	":": TokenCOLON,
+	"=": TokenEQUAL,
 
 	// Arithmetic operators
 

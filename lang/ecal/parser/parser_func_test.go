@@ -34,6 +34,74 @@ statements
 	}
 }
 
+func TestFuncParsing(t *testing.T) {
+
+	input := `import "foo/bar.ecal" as foobar
+
+func myfunc(a, b, c=1) {
+  foo := a and b and c
+  return foo
+}
+`
+	expectedOutput := `
+statements
+  import
+    string: 'foo/bar.ecal'
+    identifier: foobar
+  function
+    identifier: myfunc
+    params
+      identifier: a
+      identifier: b
+      preset
+        identifier: c
+        number: 1
+    statements
+      :=
+        identifier: foo
+        and
+          and
+            identifier: a
+            identifier: b
+          identifier: c
+      return
+        identifier: foo
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+func myfunc() {
+  a := 1
+  return
+  b := 2
+  return
+}
+`
+	expectedOutput = `
+function
+  identifier: myfunc
+  params
+  statements
+    :=
+      identifier: a
+      number: 1
+    return
+    :=
+      identifier: b
+      number: 2
+    return
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}
+
 func TestFunctionCalling(t *testing.T) {
 
 	input := `import "foo/bar.ecal" as foobar

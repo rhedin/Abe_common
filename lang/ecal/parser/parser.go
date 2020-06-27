@@ -36,6 +36,7 @@ func init() {
 		TokenCOMPACCESS: {NodeCOMPACCESS, nil, nil, nil, nil, 0, nil, nil},
 		TokenLIST:       {NodeLIST, nil, nil, nil, nil, 0, nil, nil},
 		TokenMAP:        {NodeMAP, nil, nil, nil, nil, 0, nil, nil},
+		TokenPARAMS:     {NodePARAMS, nil, nil, nil, nil, 0, nil, nil},
 		/*
 			TokenGUARD:      {NodeGUARD, nil, nil, nil, 0, nil, nil},
 		*/
@@ -67,6 +68,7 @@ func init() {
 		// Grouping
 
 		TokenCOLON: {NodeKVP, nil, nil, nil, nil, 60, nil, ldInfix},
+		TokenEQUAL: {NodePRESET, nil, nil, nil, nil, 60, nil, ldInfix},
 
 		// Arithmetic operators
 
@@ -86,10 +88,28 @@ func init() {
 		TokenIMPORT: {NodeIMPORT, nil, nil, nil, nil, 0, ndImport, nil},
 		TokenAS:     {"", nil, nil, nil, nil, 0, ndImport, nil},
 
+		/*
+			// Sink definition
+
+			TokenSINK
+			TokenKINDMATCH
+			TokenSCOPEMATCH
+			TokenSTATEMATCH
+			TokenPRIORITY
+			TokenSUPPRESSES
+
+
+		*/
+
+		// Function definition
+
+		TokenFUNC:   {NodeFUNC, nil, nil, nil, nil, 0, ndFunc, nil},
+		TokenRETURN: {NodeRETURN, nil, nil, nil, nil, 0, ndReturn, nil},
+
 		// Boolean operators
 
-		TokenOR:  {NodeOR, nil, nil, nil, nil, 30, nil, ldInfix},
 		TokenAND: {NodeAND, nil, nil, nil, nil, 40, nil, ldInfix},
+		TokenOR:  {NodeOR, nil, nil, nil, nil, 30, nil, ldInfix},
 		TokenNOT: {NodeNOT, nil, nil, nil, nil, 20, ndPrefix, nil},
 
 		// Condition operators
@@ -105,6 +125,20 @@ func init() {
 		TokenFALSE: {NodeFALSE, nil, nil, nil, nil, 0, ndTerm, nil},
 		TokenTRUE:  {NodeTRUE, nil, nil, nil, nil, 0, ndTerm, nil},
 		TokenNULL:  {NodeNULL, nil, nil, nil, nil, 0, ndTerm, nil},
+
+		/*
+			// Conditional statements
+
+			TokenIF
+			TokenELIF
+			TokenELSE
+
+			// Loop statements
+
+			TokenFOR
+			TokenBREAK
+			TokenCONTINUE
+		*/
 	}
 }
 
@@ -371,6 +405,73 @@ func ndImport(p *parser, self *ASTNode) (*ASTNode, error) {
 }
 
 /*
+ndFunc is used to parse function definitions.
+*/
+func ndFunc(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// Must specify a function name
+
+	err := acceptChild(p, self, TokenIDENTIFIER)
+
+	// Read in parameters
+
+	if err == nil {
+		err = skipToken(p, TokenLPAREN)
+
+		params := astNodeMap[TokenPARAMS].instance(p, nil)
+		self.Children = append(self.Children, params)
+
+		for err == nil && p.node.Token.ID != TokenRPAREN {
+
+			// Parse all the expressions inside
+
+			exp, err := p.run(0)
+			if err == nil {
+				params.Children = append(params.Children, exp)
+
+				if p.node.Token.ID == TokenCOMMA {
+					err = skipToken(p, TokenCOMMA)
+				}
+			}
+		}
+
+		if err == nil {
+			err = skipToken(p, TokenRPAREN)
+		}
+	}
+
+	if err == nil {
+
+		// Parse the body
+
+		self, err = parseInnerStatements(p, self)
+	}
+
+	return self, err
+}
+
+/*
+ndReturn is used to parse return statements.
+*/
+func ndReturn(p *parser, self *ASTNode) (*ASTNode, error) {
+	var err error
+
+	if self.Token.Lline == p.node.Token.Lline {
+		var val *ASTNode
+
+		// Consume the next expression only if it is on the same line
+
+		val, err = p.run(0)
+
+		if err == nil {
+			self.Children = append(self.Children, val)
+		}
+	}
+
+	return self, err
+}
+
+/*
 ndIdentifier is to parse identifiers and function calls.
 */
 func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
@@ -611,4 +712,55 @@ func acceptChild(p *parser, self *ASTNode, id LexTokenID) error {
 	}
 
 	return p.newParserError(ErrUnexpectedToken, current.Token.Val, *current.Token)
+}
+
+/*
+parseInnerStatements collects the inner statements of a block statement. It
+is assumed that a block statement starts with a left brace '{' and ends with
+a right brace '}'.
+*/
+func parseInnerStatements(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// Must start with an opening brace
+
+	if err := skipToken(p, TokenLBRACE); err != nil {
+		return nil, err
+	}
+
+	// Always create a statements node
+
+	st := astNodeMap[TokenSTATEMENTS].instance(p, nil)
+	self.Children = append(self.Children, st)
+
+	// Check if there are actually children
+
+	if p.node != nil && p.node.Token.ID != TokenRBRACE {
+
+		n, err := p.run(0)
+
+		if p.node != nil && p.node.Token.ID != TokenEOF {
+
+			st.Children = append(st.Children, n)
+
+			for hasMoreStatements(p, n) {
+
+				if p.node.Token.ID == TokenSEMICOLON {
+					skipToken(p, TokenSEMICOLON)
+				} else if p.node.Token.ID == TokenRBRACE {
+					break
+				}
+
+				n, err = p.run(0)
+				st.Children = append(st.Children, n)
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Must end with a closing brace
+
+	return self, skipToken(p, TokenRBRACE)
 }

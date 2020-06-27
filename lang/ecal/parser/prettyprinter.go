@@ -41,6 +41,9 @@ func init() {
 		// NodeSTATEMENTS - Special case (handled in code)
 		// NodeFUNCCALL - Special case (handled in code)
 		NodeCOMPACCESS + "_1": template.Must(template.New(NodeCOMPACCESS).Parse("[{{.c1}}]")),
+		// TokenLIST - Special case (handled in code)
+		// TokenMAP - Special case (handled in code)
+		// TokenPARAMS - Special case (handled in code)
 
 		/*
 
@@ -71,6 +74,12 @@ func init() {
 		NodeMODINT + "_2": template.Must(template.New(NodeMODINT).Parse("{{.c1}} % {{.c2}}")),
 		NodeDIVINT + "_2": template.Must(template.New(NodeDIVINT).Parse("{{.c1}} // {{.c2}}")),
 
+		// Function definition
+
+		NodeFUNC + "_3":   template.Must(template.New(NodeDIVINT).Parse("func {{.c1}}{{.c2}} {\n{{.c3}}}")),
+		NodeRETURN:        template.Must(template.New(NodeDIVINT).Parse("return")),
+		NodeRETURN + "_1": template.Must(template.New(NodeDIVINT).Parse("return {{.c1}}")),
+
 		// Boolean operators
 
 		NodeOR + "_2":  template.Must(template.New(NodeGEQ).Parse("{{.c1}} or {{.c2}}")),
@@ -94,7 +103,8 @@ func init() {
 
 		// Separators
 
-		NodeKVP + "_2": template.Must(template.New(NodeLT).Parse("{{.c1}} : {{.c2}}")),
+		NodeKVP + "_2":    template.Must(template.New(NodeLT).Parse("{{.c1}} : {{.c2}}")),
+		NodePRESET + "_2": template.Must(template.New(NodeLT).Parse("{{.c1}}={{.c2}}")),
 
 		// Constants
 
@@ -233,6 +243,18 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			}
 			buf.WriteString(tempParam[fmt.Sprint("c", i)])
 			buf.WriteString("}")
+
+			return ppMetaData(ast, buf.String()), nil
+		} else if ast.Name == NodePARAMS {
+
+			buf.WriteString("(")
+			i := 1
+			for ; i < numChildren; i++ {
+				buf.WriteString(tempParam[fmt.Sprint("c", i)])
+				buf.WriteString(", ")
+			}
+			buf.WriteString(tempParam[fmt.Sprint("c", i)])
+			buf.WriteString(")")
 
 			return ppMetaData(ast, buf.String()), nil
 		}

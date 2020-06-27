@@ -42,9 +42,6 @@ suppresses | A list of sink names which should be suppressed if this sink is exe
 Example:
 ```
 sink "mysink"
-    r"
-    A comment describing the sink.
-    "
     kindmatch [ foo.bar.* ],
     scopematch [ "data.read", "data.write" ],
     statematch { a : 1, b : NULL },
