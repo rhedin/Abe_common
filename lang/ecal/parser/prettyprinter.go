@@ -32,14 +32,14 @@ var bracketPrecedenceMap map[string]bool
 func init() {
 	prettyPrinterMap = map[string]*template.Template{
 
-		NodeSTRING:            template.Must(template.New(NodeTRUE).Parse("{{.qval}}")),
-		NodeNUMBER:            template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
-		NodeIDENTIFIER:        template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
-		NodeIDENTIFIER + "_1": template.Must(template.New(NodeTRUE).Parse("{{.val}}.{{.c1}}")),
+		NodeSTRING: template.Must(template.New(NodeTRUE).Parse("{{.qval}}")),
+		NodeNUMBER: template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
+		// NodeIDENTIFIER - Special case (handled in code)
 
 		// Constructed tokens
 
 		// NodeSTATEMENTS - Special case (handled in code)
+		// NodeFUNCCALL - Special case (handled in code)
 
 		/*
 
@@ -112,6 +112,24 @@ PrettyPrint produces pretty printed code from a given AST.
 func PrettyPrint(ast *ASTNode) (string, error) {
 	var visit func(ast *ASTNode, level int) (string, error)
 
+	ppMetaData := func(ast *ASTNode, ppString string) string {
+		ret := ppString
+
+		// Add meta data
+
+		if len(ast.Meta) > 0 {
+			for _, meta := range ast.Meta {
+				if meta.Type() == MetaDataPreComment {
+					ret = fmt.Sprintf("/*%v*/ %v", meta.Value(), ret)
+				} else if meta.Type() == MetaDataPostComment {
+					ret = fmt.Sprintf("%v #%v", ret, meta.Value())
+				}
+			}
+		}
+
+		return ret
+	}
+
 	visit = func(ast *ASTNode, level int) (string, error) {
 		var buf bytes.Buffer
 		var numChildren = len(ast.Children)
@@ -142,7 +160,7 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			tempKey += fmt.Sprint("_", len(tempParam))
 		}
 
-		// Handle special cases requiring children
+		// Handle special cases - children in tempParam have been resolved
 
 		if ast.Name == NodeSTATEMENTS {
 
@@ -154,8 +172,38 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 				buf.WriteString("\n")
 			}
 
-			return buf.String(), nil
+			return ppMetaData(ast, buf.String()), nil
 
+		} else if ast.Name == NodeFUNCCALL {
+
+			// For statements just concat all children
+
+			for i := 0; i < numChildren; i++ {
+				buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
+				if i < numChildren-1 {
+					buf.WriteString(", ")
+				}
+			}
+
+			return ppMetaData(ast, buf.String()), nil
+
+		} else if ast.Name == NodeIDENTIFIER {
+
+			buf.WriteString(ast.Token.Val)
+
+			for i := 0; i < numChildren; i++ {
+				if ast.Children[i].Name == NodeIDENTIFIER {
+					buf.WriteString(".")
+					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
+				}
+				if ast.Children[i].Name == NodeFUNCCALL {
+					buf.WriteString("(")
+					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
+					buf.WriteString(")")
+				}
+			}
+
+			return ppMetaData(ast, buf.String()), nil
 		}
 
 		if ast.Token != nil {
@@ -178,21 +226,7 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 
 		errorutil.AssertOk(temp.Execute(&buf, tempParam))
 
-		ret := buf.String()
-
-		// Add meta data
-
-		if len(ast.Meta) > 0 {
-			for _, meta := range ast.Meta {
-				if meta.Type() == MetaDataPreComment {
-					ret = fmt.Sprintf("/*%v*/ %v", meta.Value(), ret)
-				} else if meta.Type() == MetaDataPostComment {
-					ret = fmt.Sprintf("%v #%v", ret, meta.Value())
-				}
-			}
-		}
-
-		return ret, nil
+		return ppMetaData(ast, buf.String()), nil
 	}
 
 	return visit(ast, 0)

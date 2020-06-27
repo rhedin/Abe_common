@@ -32,6 +32,7 @@ func init() {
 		// Constructed tokens
 
 		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, nil, 0, nil, nil},
+		TokenFUNCCALL:   {NodeFUNCCALL, nil, nil, nil, nil, 0, nil, nil},
 		/*
 			TokenLIST:       {NodeLIST, nil, nil, nil, 0, nil, nil},
 			TokenMAP:        {NodeMAP, nil, nil, nil, 0, nil, nil},
@@ -364,26 +365,67 @@ func ndImport(p *parser, self *ASTNode) (*ASTNode, error) {
 ndIdentifier is to parse identifiers and function calls.
 */
 func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
-	var err error
+	var parseMore, parseSegment, parseFuncCall func(parent *ASTNode) error
 
-	// If the next token is a dot we got a dotted identifier
-	// collect all segments as children with a child being the
-	// parent of the next segment
+	parseMore = func(current *ASTNode) error {
+		var err error
 
-	if p.node.Token.ID == TokenDOT {
-		parent := self
-		for err == nil && p.node.Token.ID == TokenDOT {
-			if err = skipToken(p, TokenDOT); err == nil {
-				err = acceptChild(p, parent, TokenIDENTIFIER)
-				parent = parent.Children[0]
-			}
+		if p.node.Token.ID == TokenDOT {
+			err = parseSegment(current)
+		} else if p.node.Token.ID == TokenLPAREN {
+			err = parseFuncCall(current)
 		}
+
+		return err
 	}
 
-	// TODO Look at the next token p.node and determine if we need to build
-	// a function call or list/map access
+	parseSegment = func(current *ASTNode) error {
+		var err error
+		var next *ASTNode
 
-	return self, err
+		if err = skipToken(p, TokenDOT); err == nil {
+			next = p.node
+			if err = acceptChild(p, current, TokenIDENTIFIER); err == nil {
+				err = parseMore(next)
+			}
+		}
+
+		return err
+	}
+
+	parseFuncCall = func(current *ASTNode) error {
+		err := skipToken(p, TokenLPAREN)
+
+		fc := astNodeMap[TokenFUNCCALL].instance(p, nil)
+		current.Children = append(current.Children, fc)
+
+		// Read in parameters
+
+		for err == nil && p.node.Token.ID != TokenRPAREN {
+
+			// Parse all the expressions inside the directives
+
+			exp, err := p.run(0)
+			if err == nil {
+				fc.Children = append(fc.Children, exp)
+
+				if p.node.Token.ID == TokenCOMMA {
+					err = skipToken(p, TokenCOMMA)
+				}
+			}
+		}
+
+		if err == nil {
+			err = skipToken(p, TokenRPAREN)
+			if err == nil {
+				err = parseMore(current)
+			}
+		}
+
+		return err
+	}
+
+	return self, parseMore(self)
 }
 
 // Standard left denotation functions

@@ -72,6 +72,8 @@ func myfunc(a, b, c=1) {
 }
 ```
 
+Primitive values are passed by value, composition structures like maps and lists are passed by reference.
+
 Comments
 --
 Comments are defined with `#` as single line comments and `/*` `*/` for multiline comments.
@@ -143,7 +145,7 @@ Expression|Value
 
 Variable Assignments
 --
-A variable is a storage location for holding a value. Variables can hold single values (strings and numbers) or structures like an array or a map. Variables names can only contain [a-zA-Z] and [a-zA-Z0-9] from the second character.
+A variable is a storage bucket for holding a value. Variables can hold primitive values (strings and numbers) or composition structures like an array or a map. Variables names can only contain [a-zA-Z] and [a-zA-Z0-9] from the second character.
 
 A variable is assigned with the assign operator ':='
 ```
