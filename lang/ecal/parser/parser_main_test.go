@@ -68,74 +68,30 @@ statements
 		return
 	}
 
-	input = `a := 1
-a().foo := x2.foo()
-a.b.c().foo := a()
+	input = `a := b[1 + 1]
+	a[4].foo["aaa"] := c[i]
 	`
 	expectedOutput = `
 statements
   :=
     identifier: a
-    number: 1
-  :=
-    identifier: a
-      funccall
-      identifier: foo
-    identifier: x2
-      identifier: foo
-        funccall
-  :=
-    identifier: a
-      identifier: b
-        identifier: c
-          funccall
-          identifier: foo
-    identifier: a
-      funccall
-`[1:]
-
-	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
-		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
-		return
-	}
-
-	input = `a(1+2).foo := x2.foo(foo)
-a.b.c(x()).foo := a(1,a(),3, x, y) + 1
-	`
-	expectedOutput = `
-statements
-  :=
-    identifier: a
-      funccall
+    identifier: b
+      compaccess
         plus
           number: 1
-          number: 2
-      identifier: foo
-    identifier: x2
-      identifier: foo
-        funccall
-          identifier: foo
+          number: 1
   :=
     identifier: a
-      identifier: b
-        identifier: c
-          funccall
-            identifier: x
-              funccall
-          identifier: foo
-    plus
-      identifier: a
-        funccall
-          number: 1
-          identifier: a
-            funccall
-          number: 3
-          identifier: x
-          identifier: y
-      number: 1
+      compaccess
+        number: 4
+      identifier: foo
+        compaccess
+          string: 'aaa'
+    identifier: c
+      compaccess
+        identifier: i
 `[1:]
-
-	if res, err := UnitTestParseWithPPResult("mytest", input, ""); err != nil || fmt.Sprint(res) != expectedOutput {
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
 		return
 	}

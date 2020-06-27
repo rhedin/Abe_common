@@ -33,6 +33,7 @@ func init() {
 
 		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, nil, 0, nil, nil},
 		TokenFUNCCALL:   {NodeFUNCCALL, nil, nil, nil, nil, 0, nil, nil},
+		TokenCOMPACCESS: {NodeCOMPACCESS, nil, nil, nil, nil, 0, nil, nil},
 		/*
 			TokenLIST:       {NodeLIST, nil, nil, nil, 0, nil, nil},
 			TokenMAP:        {NodeMAP, nil, nil, nil, 0, nil, nil},
@@ -50,6 +51,8 @@ func init() {
 
 		// Grouping symbols
 
+		TokenLBRACK: {"", nil, nil, nil, nil, 150, ndInner, nil},
+		TokenRBRACK: {"", nil, nil, nil, nil, 0, nil, nil},
 		TokenLPAREN: {"", nil, nil, nil, nil, 150, ndInner, nil},
 		TokenRPAREN: {"", nil, nil, nil, nil, 0, nil, nil},
 
@@ -365,7 +368,7 @@ func ndImport(p *parser, self *ASTNode) (*ASTNode, error) {
 ndIdentifier is to parse identifiers and function calls.
 */
 func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
-	var parseMore, parseSegment, parseFuncCall func(parent *ASTNode) error
+	var parseMore, parseSegment, parseFuncCall, parseCompositionAccess func(parent *ASTNode) error
 
 	parseMore = func(current *ASTNode) error {
 		var err error
@@ -374,6 +377,8 @@ func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
 			err = parseSegment(current)
 		} else if p.node.Token.ID == TokenLPAREN {
 			err = parseFuncCall(current)
+		} else if p.node.Token.ID == TokenLBRACK {
+			err = parseCompositionAccess(current)
 		}
 
 		return err
@@ -418,6 +423,26 @@ func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
 		if err == nil {
 			err = skipToken(p, TokenRPAREN)
 			if err == nil {
+				err = parseMore(current)
+			}
+		}
+
+		return err
+	}
+
+	parseCompositionAccess = func(current *ASTNode) error {
+		err := skipToken(p, TokenLBRACK)
+
+		ca := astNodeMap[TokenCOMPACCESS].instance(p, nil)
+		current.Children = append(current.Children, ca)
+
+		// Parse all the expressions inside the directives
+
+		exp, err := p.run(0)
+		if err == nil {
+			ca.Children = append(ca.Children, exp)
+
+			if err = skipToken(p, TokenRBRACK); err == nil {
 				err = parseMore(current)
 			}
 		}

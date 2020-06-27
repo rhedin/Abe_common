@@ -32,14 +32,15 @@ var bracketPrecedenceMap map[string]bool
 func init() {
 	prettyPrinterMap = map[string]*template.Template{
 
-		NodeSTRING: template.Must(template.New(NodeTRUE).Parse("{{.qval}}")),
-		NodeNUMBER: template.Must(template.New(NodeTRUE).Parse("{{.val}}")),
+		NodeSTRING: template.Must(template.New(NodeSTRING).Parse("{{.qval}}")),
+		NodeNUMBER: template.Must(template.New(NodeNUMBER).Parse("{{.val}}")),
 		// NodeIDENTIFIER - Special case (handled in code)
 
 		// Constructed tokens
 
 		// NodeSTATEMENTS - Special case (handled in code)
 		// NodeFUNCCALL - Special case (handled in code)
+		NodeCOMPACCESS + "_1": template.Must(template.New(NodeCOMPACCESS).Parse("[{{.c1}}]")),
 
 		/*
 
@@ -61,7 +62,7 @@ func init() {
 
 		// Arithmetic operators
 
-		NodePLUS + "_1":   template.Must(template.New(NodeMINUS).Parse("+{{.c1}}")),
+		NodePLUS + "_1":   template.Must(template.New(NodePLUS).Parse("+{{.c1}}")),
 		NodePLUS + "_2":   template.Must(template.New(NodePLUS).Parse("{{.c1}} + {{.c2}}")),
 		NodeMINUS + "_1":  template.Must(template.New(NodeMINUS).Parse("-{{.c1}}")),
 		NodeMINUS + "_2":  template.Must(template.New(NodeMINUS).Parse("{{.c1}} - {{.c2}}")),
@@ -195,11 +196,12 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 				if ast.Children[i].Name == NodeIDENTIFIER {
 					buf.WriteString(".")
 					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
-				}
-				if ast.Children[i].Name == NodeFUNCCALL {
+				} else if ast.Children[i].Name == NodeFUNCCALL {
 					buf.WriteString("(")
 					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
 					buf.WriteString(")")
+				} else if ast.Children[i].Name == NodeCOMPACCESS {
+					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
 				}
 			}
 
