@@ -92,6 +92,10 @@ func init() {
 		NodeGT + "_2":  template.Must(template.New(NodeGT).Parse("{{.c1}} > {{.c2}}")),
 		NodeLT + "_2":  template.Must(template.New(NodeLT).Parse("{{.c1}} < {{.c2}}")),
 
+		// Separators
+
+		NodeKVP + "_2": template.Must(template.New(NodeLT).Parse("{{.c1}} : {{.c2}}")),
+
 		// Constants
 
 		NodeTRUE:  template.Must(template.New(NodeTRUE).Parse("true")),
@@ -204,6 +208,31 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 					buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
 				}
 			}
+
+			return ppMetaData(ast, buf.String()), nil
+		} else if ast.Name == NodeLIST {
+
+			buf.WriteString("[")
+			i := 1
+			for ; i < numChildren; i++ {
+				buf.WriteString(tempParam[fmt.Sprint("c", i)])
+				buf.WriteString(", ")
+			}
+			buf.WriteString(tempParam[fmt.Sprint("c", i)])
+			buf.WriteString("]")
+
+			return ppMetaData(ast, buf.String()), nil
+
+		} else if ast.Name == NodeMAP {
+
+			buf.WriteString("{")
+			i := 1
+			for ; i < numChildren; i++ {
+				buf.WriteString(tempParam[fmt.Sprint("c", i)])
+				buf.WriteString(", ")
+			}
+			buf.WriteString(tempParam[fmt.Sprint("c", i)])
+			buf.WriteString("}")
 
 			return ppMetaData(ast, buf.String()), nil
 		}

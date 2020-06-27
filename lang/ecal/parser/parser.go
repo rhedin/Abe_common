@@ -34,9 +34,9 @@ func init() {
 		TokenSTATEMENTS: {NodeSTATEMENTS, nil, nil, nil, nil, 0, nil, nil},
 		TokenFUNCCALL:   {NodeFUNCCALL, nil, nil, nil, nil, 0, nil, nil},
 		TokenCOMPACCESS: {NodeCOMPACCESS, nil, nil, nil, nil, 0, nil, nil},
+		TokenLIST:       {NodeLIST, nil, nil, nil, nil, 0, nil, nil},
+		TokenMAP:        {NodeMAP, nil, nil, nil, nil, 0, nil, nil},
 		/*
-			TokenLIST:       {NodeLIST, nil, nil, nil, 0, nil, nil},
-			TokenMAP:        {NodeMAP, nil, nil, nil, 0, nil, nil},
 			TokenGUARD:      {NodeGUARD, nil, nil, nil, 0, nil, nil},
 		*/
 
@@ -51,16 +51,22 @@ func init() {
 
 		// Grouping symbols
 
-		TokenLBRACK: {"", nil, nil, nil, nil, 150, ndInner, nil},
-		TokenRBRACK: {"", nil, nil, nil, nil, 0, nil, nil},
 		TokenLPAREN: {"", nil, nil, nil, nil, 150, ndInner, nil},
 		TokenRPAREN: {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenLBRACK: {"", nil, nil, nil, nil, 150, ndList, nil},
+		TokenRBRACK: {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenLBRACE: {"", nil, nil, nil, nil, 150, ndMap, nil},
+		TokenRBRACE: {"", nil, nil, nil, nil, 0, nil, nil},
 
 		// Separators
 
 		TokenDOT:       {"", nil, nil, nil, nil, 0, nil, nil},
 		TokenCOMMA:     {"", nil, nil, nil, nil, 0, nil, nil},
 		TokenSEMICOLON: {"", nil, nil, nil, nil, 0, nil, nil},
+
+		// Grouping
+
+		TokenCOLON: {NodeKVP, nil, nil, nil, nil, 60, nil, ldInfix},
 
 		// Arithmetic operators
 
@@ -451,6 +457,72 @@ func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
 	}
 
 	return self, parseMore(self)
+}
+
+/*
+ndList is used to collect elements of a list.
+*/
+func ndList(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// Create a list token
+
+	st := astNodeMap[TokenLIST].instance(p, self.Token)
+
+	// Get the inner expression
+
+	for p.node.Token.ID != TokenRBRACK {
+
+		// Parse all the expressions inside
+
+		exp, err := p.run(0)
+		if err != nil {
+			return nil, err
+		}
+
+		st.Children = append(st.Children, exp)
+
+		if p.node.Token.ID == TokenCOMMA {
+			skipToken(p, TokenCOMMA)
+		}
+	}
+
+	// Must have a closing bracket
+
+	return st, skipToken(p, TokenRBRACK)
+}
+
+/*
+ndMap is used to collect elements of a map.
+*/
+func ndMap(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// Create a map token
+
+	st := astNodeMap[TokenMAP].instance(p, self.Token)
+
+	// Get the inner expression
+
+	for p.node.Token.ID != TokenRBRACE {
+
+		// Parse all the expressions inside
+
+		exp, err := p.run(0)
+		if err != nil {
+			return nil, err
+		}
+
+		st.Children = append(st.Children, exp)
+
+		if p.node.Token.ID == TokenCOMMA {
+			if err := skipToken(p, TokenCOMMA); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Must have a closing brace
+
+	return st, skipToken(p, TokenRBRACE)
 }
 
 // Standard left denotation functions

@@ -101,8 +101,11 @@ const (
 
 	TokenDOT
 	TokenCOMMA
-	TokenCOLON
 	TokenSEMICOLON
+
+	// Grouping
+
+	TokenCOLON
 
 	// Arithmetic operators
 
@@ -116,8 +119,6 @@ const (
 	// Assignment statement
 
 	TokenASSIGN
-
-	// The colon '' has a context specific meaning and is checked by the parser
 
 	TOKENodeKEYWORDS // Used to separate keywords from other tokens in this list
 
@@ -194,8 +195,10 @@ const (
 	// Constructed tokens
 
 	NodeSTATEMENTS = "statements" // List of statements
-	NodeFUNCCALL   = "funccall"
-	NodeCOMPACCESS = "compaccess"
+	NodeFUNCCALL   = "funccall"   // Function call
+	NodeCOMPACCESS = "compaccess" // Composition structure access
+	NodeLIST       = "list"       // List value
+	NodeMAP        = "map"        // Map value
 
 	// Condition operators
 
@@ -205,6 +208,10 @@ const (
 	NodeEQ  = "=="
 	NodeGT  = ">"
 	NodeLT  = "<"
+
+	// Separators
+
+	NodeKVP = "kvp" // Key-value pair
 
 	// Arithmetic operators
 
