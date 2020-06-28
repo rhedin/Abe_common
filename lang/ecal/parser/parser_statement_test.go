@@ -1,0 +1,294 @@
+/*
+ * Public Domain Software
+ *
+ * I (Matthias Ladkau) am the author of the source code in this file.
+ * I have placed the source code in this file in the public domain.
+ *
+ * For further information see: http://creativecommons.org/publicdomain/zero/1.0/
+ */
+
+package parser
+
+import (
+	"fmt"
+	"testing"
+)
+
+func TestLoopParsing(t *testing.T) {
+
+	input := `
+for a != null {
+	print(1);
+	print(2);
+	break
+	continue
+}
+`
+	expectedOutput := `
+loop
+  guard
+    !=
+      identifier: a
+      null
+  statements
+    identifier: print
+      funccall
+        number: 1
+    identifier: print
+      funccall
+        number: 2
+    break
+    continue
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+for a in range(1,2) {
+	print(1);
+	print(2)
+}
+`
+	expectedOutput = `
+loop
+  in
+    identifier: a
+    identifier: range
+      funccall
+        number: 1
+        number: 2
+  statements
+    identifier: print
+      funccall
+        number: 1
+    identifier: print
+      funccall
+        number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+
+	}
+	input = `
+for a < 1 and b > 2 {
+	print(1)
+	print(2)
+}
+`
+	expectedOutput = `
+loop
+  guard
+    and
+      <
+        identifier: a
+        number: 1
+      >
+        identifier: b
+        number: 2
+  statements
+    identifier: print
+      funccall
+        number: 1
+    identifier: print
+      funccall
+        number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+for a in range(1,2,3) {
+	==
+}
+`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (==) (Line:3 Pos:2)" {
+		t.Error(err)
+		return
+	}
+
+	input = `
+for a in == {
+	@print(1)
+}
+`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (==) (Line:2 Pos:10)" {
+		t.Error(err)
+		return
+	}
+}
+
+func TestConditionalParsing(t *testing.T) {
+
+	input := `
+if a == b or c < d {
+    print(1);
+	foo := 1
+} elif x or y {
+	x := 1; y := 2; p := {
+		1:2
+	}
+} elif true {
+	x := 1; y := 2
+} else {
+	x := 1
+}
+`
+	expectedOutput := `
+if
+  guard
+    or
+      ==
+        identifier: a
+        identifier: b
+      <
+        identifier: c
+        identifier: d
+  statements
+    identifier: print
+      funccall
+        number: 1
+    :=
+      identifier: foo
+      number: 1
+  guard
+    or
+      identifier: x
+      identifier: y
+  statements
+    :=
+      identifier: x
+      number: 1
+    :=
+      identifier: y
+      number: 2
+    :=
+      identifier: p
+      map
+        kvp
+          number: 1
+          number: 2
+  guard
+    true
+  statements
+    :=
+      identifier: x
+      number: 1
+    :=
+      identifier: y
+      number: 2
+  guard
+    true
+  statements
+    :=
+      identifier: x
+      number: 1
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+if a {
+    print(1)
+} elif b {
+	print(2)
+}
+`
+	expectedOutput = `
+if
+  guard
+    identifier: a
+  statements
+    identifier: print
+      funccall
+        number: 1
+  guard
+    identifier: b
+  statements
+    identifier: print
+      funccall
+        number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+if a {
+    print(1)
+} else {
+	print(2)
+}
+`
+	expectedOutput = `
+if
+  guard
+    identifier: a
+  statements
+    identifier: print
+      funccall
+        number: 1
+  guard
+    true
+  statements
+    identifier: print
+      funccall
+        number: 2
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	// Test error output
+
+	input = `else { b }`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (<ELSE>) (Line:1 Pos:1)" {
+		t.Error(err)
+		return
+	}
+
+	input = `elif { b }`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (<ELIF>) (Line:1 Pos:1)" {
+		t.Error(err)
+		return
+	}
+
+	input = `if { b }`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Unexpected end (Line:1 Pos:8)" {
+		t.Error(err)
+		return
+	}
+
+	input = `if == { b }`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (==) (Line:1 Pos:4)" {
+		t.Error(err)
+		return
+	}
+
+	input = `if x { b } elif == { c }`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (==) (Line:1 Pos:17)" {
+		t.Error(err)
+		return
+	}
+}
