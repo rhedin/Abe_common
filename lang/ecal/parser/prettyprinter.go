@@ -45,23 +45,22 @@ func init() {
 		// TokenMAP - Special case (handled in code)
 		// TokenPARAMS - Special case (handled in code)
 
-		/*
-
-
-			NodeSTATEMENTS = "statements" // List of statements
-
-			// Assignment statement
-
-			NodeASSIGN = ":="
-		*/
-
 		// Assignment statement
 
-		NodeASSIGN + "_2": template.Must(template.New(NodeMINUS).Parse("{{.c1}} := {{.c2}}")),
+		NodeASSIGN + "_2": template.Must(template.New(NodeASSIGN).Parse("{{.c1}} := {{.c2}}")),
 
 		// Import statement
 
-		NodeIMPORT + "_2": template.Must(template.New(NodeMINUS).Parse("import {{.c1}} as {{.c2}}")),
+		NodeIMPORT + "_2": template.Must(template.New(NodeIMPORT).Parse("import {{.c1}} as {{.c2}}")),
+
+		// Sink definition
+
+		// NodeSINK - Special case (handled in code)
+		NodeKINDMATCH + "_1":  template.Must(template.New(NodeKINDMATCH).Parse("kindmatch {{.c1}}")),
+		NodeSCOPEMATCH + "_1": template.Must(template.New(NodeSCOPEMATCH).Parse("scopematch {{.c1}}")),
+		NodeSTATEMATCH + "_1": template.Must(template.New(NodeSTATEMATCH).Parse("statematch {{.c1}}")),
+		NodePRIORITY + "_1":   template.Must(template.New(NodePRIORITY).Parse("priority {{.c1}}")),
+		NodeSUPPRESSES + "_1": template.Must(template.New(NodeSUPPRESSES).Parse("suppresses {{.c1}}")),
 
 		// Arithmetic operators
 
@@ -76,23 +75,23 @@ func init() {
 
 		// Function definition
 
-		NodeFUNC + "_3":   template.Must(template.New(NodeDIVINT).Parse("func {{.c1}}{{.c2}} {\n{{.c3}}}")),
-		NodeRETURN:        template.Must(template.New(NodeDIVINT).Parse("return")),
-		NodeRETURN + "_1": template.Must(template.New(NodeDIVINT).Parse("return {{.c1}}")),
+		NodeFUNC + "_3":   template.Must(template.New(NodeFUNC).Parse("func {{.c1}}{{.c2}} {\n{{.c3}}}")),
+		NodeRETURN:        template.Must(template.New(NodeRETURN).Parse("return")),
+		NodeRETURN + "_1": template.Must(template.New(NodeRETURN).Parse("return {{.c1}}")),
 
 		// Boolean operators
 
-		NodeOR + "_2":  template.Must(template.New(NodeGEQ).Parse("{{.c1}} or {{.c2}}")),
-		NodeAND + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} and {{.c2}}")),
+		NodeOR + "_2":  template.Must(template.New(NodeOR).Parse("{{.c1}} or {{.c2}}")),
+		NodeAND + "_2": template.Must(template.New(NodeAND).Parse("{{.c1}} and {{.c2}}")),
 		NodeNOT + "_1": template.Must(template.New(NodeNOT).Parse("not {{.c1}}")),
 
 		// Condition operators
 
-		NodeLIKE + "_2":      template.Must(template.New(NodeGEQ).Parse("{{.c1}} like {{.c2}}")),
-		NodeIN + "_2":        template.Must(template.New(NodeLEQ).Parse("{{.c1}} in {{.c2}}")),
-		NodeHASPREFIX + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} hasprefix {{.c2}}")),
-		NodeHASSUFFIX + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} hassuffix {{.c2}}")),
-		NodeNOTIN + "_2":     template.Must(template.New(NodeLEQ).Parse("{{.c1}} notin {{.c2}}")),
+		NodeLIKE + "_2":      template.Must(template.New(NodeLIKE).Parse("{{.c1}} like {{.c2}}")),
+		NodeIN + "_2":        template.Must(template.New(NodeIN).Parse("{{.c1}} in {{.c2}}")),
+		NodeHASPREFIX + "_2": template.Must(template.New(NodeHASPREFIX).Parse("{{.c1}} hasprefix {{.c2}}")),
+		NodeHASSUFFIX + "_2": template.Must(template.New(NodeHASSUFFIX).Parse("{{.c1}} hassuffix {{.c2}}")),
+		NodeNOTIN + "_2":     template.Must(template.New(NodeNOTIN).Parse("{{.c1}} notin {{.c2}}")),
 
 		NodeGEQ + "_2": template.Must(template.New(NodeGEQ).Parse("{{.c1}} >= {{.c2}}")),
 		NodeLEQ + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} <= {{.c2}}")),
@@ -103,8 +102,8 @@ func init() {
 
 		// Separators
 
-		NodeKVP + "_2":    template.Must(template.New(NodeLT).Parse("{{.c1}} : {{.c2}}")),
-		NodePRESET + "_2": template.Must(template.New(NodeLT).Parse("{{.c1}}={{.c2}}")),
+		NodeKVP + "_2":    template.Must(template.New(NodeKVP).Parse("{{.c1}} : {{.c2}}")),
+		NodePRESET + "_2": template.Must(template.New(NodePRESET).Parse("{{.c1}}={{.c2}}")),
 
 		// Constants
 
@@ -188,6 +187,24 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			}
 
 			return ppMetaData(ast, buf.String()), nil
+
+		} else if ast.Name == NodeSINK {
+
+			buf.WriteString("sink ")
+			buf.WriteString(tempParam["c1"])
+			buf.WriteString("\n")
+
+			for i := 1; i < len(ast.Children)-1; i++ {
+				buf.WriteString("  ")
+				buf.WriteString(tempParam[fmt.Sprint("c", i+1)])
+				buf.WriteString("\n")
+			}
+
+			buf.WriteString("{\n")
+			buf.WriteString(tempParam[fmt.Sprint("c", len(ast.Children))])
+			buf.WriteString("}\n")
+
+			return buf.String(), nil
 
 		} else if ast.Name == NodeFUNCCALL {
 

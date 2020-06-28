@@ -115,9 +115,9 @@ func TestBasicTokenLexing(t *testing.T) {
 		return
 	}
 
-	input = `test := not a * 1.3 or (12 / aa) * 5 DIV 3 % 1 > true`
+	input = `test := not a * 1.3 or (12 / aa) * 5 DiV 3 % 1 > trUe`
 	if res := LexToList("mytest", input); fmt.Sprint(res) !=
-		`["test" := <NOT> "a" * v:"1.3" <OR> ( v:"12" / "aa" ) * v:"5" "div" v:"3" % v:"1" > <TRUE> EOF]` {
+		`["test" := <NOT> "a" * v:"1.3" <OR> ( v:"12" / "aa" ) * v:"5" "DiV" v:"3" % v:"1" > <TRUE> EOF]` {
 		t.Error("Unexpected lexer result:\n  ", res)
 		return
 	}

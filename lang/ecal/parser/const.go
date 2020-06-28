@@ -238,6 +238,15 @@ const (
 
 	NodeIMPORT = "import"
 
+	// Sink definition
+
+	NodeSINK       = "sink"
+	NodeKINDMATCH  = "kindmatch"
+	NodeSCOPEMATCH = "scopematch"
+	NodeSTATEMATCH = "statematch"
+	NodePRIORITY   = "priority"
+	NodeSUPPRESSES = "suppresses"
+
 	// Function definition
 
 	NodeFUNC   = "function"
@@ -265,30 +274,7 @@ const (
 
 /*
 
-	NodeLIST       = "list"       // List value
-	NodeMAP        = "map"        // Map value
 	NodeGUARD      = "guard"      // Guard expressions for conditional statements
-
-	// Map entries
-
-	NodeMAPENTRY = "entry" // Map entry value
-
-	// Function call statement
-
-	NodeFUNCCALL = "funccall"
-
-	// Data structure access
-
-	NodeACCESS = "access"
-
-	// Sink definition
-
-	NodeSINK       = "sink"
-	NodeKINDMATCH  = "kindmatch"
-	NodeSCOPEMATCH = "scopematch"
-	NodeSTATEMATCH = "statematch"
-	NodePRIORITY   = "priority"
-	NodeSUPPRESSES = "suppresses"
 
 	// Block statements
 

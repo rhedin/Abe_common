@@ -16,20 +16,113 @@ import (
 
 func TestImportParsing(t *testing.T) {
 
-	input := `import "foo/bar.ecal" as foobar
-	i := foobar`
+	input := `import "foo/bar.ecal" as fooBar
+	i := fooBar`
 	expectedOutput := `
 statements
   import
     string: 'foo/bar.ecal'
-    identifier: foobar
+    identifier: fooBar
   :=
     identifier: i
-    identifier: foobar
+    identifier: fooBar
 `[1:]
 
 	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
 		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+}
+
+func TestSinkParsing(t *testing.T) {
+
+	input := `
+	sink fooBar 
+    kindmatch [ "priority", "t.do.bla" ],
+	scopematch [ "data.read", "data.write" ],
+	statematch { "priority:" : 5, test: 1, "bla 1": null },
+	priority 0,
+	suppresses [ "test1", test2 ]
+	{
+		print("test1");
+		print("test2")
+	}
+`
+	expectedOutput := `
+sink
+  identifier: fooBar
+  kindmatch
+    list
+      string: 'priority'
+      string: 't.do.bla'
+  scopematch
+    list
+      string: 'data.read'
+      string: 'data.write'
+  statematch
+    map
+      kvp
+        string: 'priority:'
+        number: 5
+      kvp
+        identifier: test
+        number: 1
+      kvp
+        string: 'bla 1'
+        null
+  priority
+    number: 0
+  suppresses
+    list
+      string: 'test1'
+      identifier: test2
+  statements
+    identifier: print
+      funccall
+        string: 'test1'
+    identifier: print
+      funccall
+        string: 'test2'
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+	sink mySink
+    kindmatch [ "priority", t.do.bla ]
+	{
+	}
+`
+	expectedOutput = `
+sink
+  identifier: mySink
+  kindmatch
+    list
+      string: 'priority'
+      identifier: t
+        identifier: do
+          identifier: bla
+  statements
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+	sink fooBar 
+    ==
+	kindmatch [ "priority", "t.do.bla" ]
+	{
+	}
+`
+	if _, err := UnitTestParse("mytest", input); err.Error() !=
+		"Parse error in mytest: Term cannot start an expression (==) (Line:3 Pos:5)" {
+		t.Error(err)
 		return
 	}
 }

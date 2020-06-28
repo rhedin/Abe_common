@@ -88,18 +88,14 @@ func init() {
 		TokenIMPORT: {NodeIMPORT, nil, nil, nil, nil, 0, ndImport, nil},
 		TokenAS:     {"", nil, nil, nil, nil, 0, ndImport, nil},
 
-		/*
-			// Sink definition
+		// Sink definition
 
-			TokenSINK
-			TokenKINDMATCH
-			TokenSCOPEMATCH
-			TokenSTATEMATCH
-			TokenPRIORITY
-			TokenSUPPRESSES
-
-
-		*/
+		TokenSINK:       {NodeSINK, nil, nil, nil, nil, 0, ndSkink, nil},
+		TokenKINDMATCH:  {NodeKINDMATCH, nil, nil, nil, nil, 150, ndPrefix, nil},
+		TokenSCOPEMATCH: {NodeSCOPEMATCH, nil, nil, nil, nil, 150, ndPrefix, nil},
+		TokenSTATEMATCH: {NodeSTATEMATCH, nil, nil, nil, nil, 150, ndPrefix, nil},
+		TokenPRIORITY:   {NodePRIORITY, nil, nil, nil, nil, 150, ndPrefix, nil},
+		TokenSUPPRESSES: {NodeSUPPRESSES, nil, nil, nil, nil, 150, ndPrefix, nil},
 
 		// Function definition
 
@@ -402,6 +398,43 @@ func ndImport(p *parser, self *ASTNode) (*ASTNode, error) {
 	}
 
 	return self, err
+}
+
+/*
+ndSink is used to parse sinks.
+*/
+func ndSkink(p *parser, self *ASTNode) (*ASTNode, error) {
+	var ret *ASTNode
+
+	// Must specify a name
+
+	err := acceptChild(p, self, TokenIDENTIFIER)
+
+	if err == nil {
+
+		// Parse the rest of the parameters as children until we reach the body
+
+		for p.node.Token.ID != TokenEOF && p.node.Token.ID != TokenLBRACE {
+			exp, err := p.run(150)
+			if err != nil {
+				return nil, err
+			}
+
+			self.Children = append(self.Children, exp)
+
+			// Skip commas
+
+			if p.node.Token.ID == TokenCOMMA {
+				skipToken(p, TokenCOMMA)
+			}
+		}
+
+		// Parse the body
+
+		ret, err = parseInnerStatements(p, self)
+	}
+
+	return ret, err
 }
 
 /*

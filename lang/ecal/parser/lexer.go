@@ -564,7 +564,8 @@ func lexToken(l *lexer) lexFunc {
 	// First try to parse a number
 
 	lexNumberBlock(l)
-	keywordCandidate := strings.ToLower(l.input[l.start:l.pos])
+	identifierCandidate := l.input[l.start:l.pos]
+	keywordCandidate := strings.ToLower(identifierCandidate)
 
 	// Check for number
 
@@ -581,7 +582,8 @@ func lexToken(l *lexer) lexFunc {
 		l.backup(l.pos - l.start)
 	}
 	lexTextBlock(l, true)
-	keywordCandidate = strings.ToLower(l.input[l.start:l.pos])
+	identifierCandidate = l.input[l.start:l.pos]
+	keywordCandidate = strings.ToLower(identifierCandidate)
 
 	// Check for keyword
 
@@ -609,7 +611,7 @@ func lexToken(l *lexer) lexFunc {
 
 		// An identifier was found
 
-		l.emitTokenAndValue(TokenIDENTIFIER, keywordCandidate, true)
+		l.emitTokenAndValue(TokenIDENTIFIER, identifierCandidate, true)
 	}
 
 	return lexToken
