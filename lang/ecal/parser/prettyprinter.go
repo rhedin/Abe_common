@@ -161,7 +161,13 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 
 	visit = func(ast *ASTNode, level int) (string, error) {
 		var buf bytes.Buffer
-		var numChildren = len(ast.Children)
+		var numChildren int
+
+		if ast == nil {
+			return "", fmt.Errorf("Nil pointer in AST at level: %v", level)
+		}
+
+		numChildren = len(ast.Children)
 
 		tempKey := ast.Name
 		tempParam := make(map[string]string)
@@ -332,10 +338,9 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 		// Retrieve the template
 
 		temp, ok := prettyPrinterMap[tempKey]
-		if !ok {
-			return "", fmt.Errorf("Could not find template for %v (tempkey: %v)",
-				ast.Name, tempKey)
-		}
+		errorutil.AssertTrue(ok,
+			fmt.Sprintf("Could not find template for %v (tempkey: %v)",
+				ast.Name, tempKey))
 
 		// Use the children as parameters for template
 

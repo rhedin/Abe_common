@@ -50,46 +50,46 @@ func NewLexTokenInstance(t LexToken) *LexToken {
 }
 
 /*
-Equal checks if this LexToken equals another LexToken. Returns also a message describing
+Equals checks if this LexToken equals another LexToken. Returns also a message describing
 what is the found difference.
 */
-func (n LexToken) Equals(other LexToken, ignorePosition bool) (bool, string) {
+func (t LexToken) Equals(other LexToken, ignorePosition bool) (bool, string) {
 	var res = true
 	var msg = ""
 
-	if n.ID != other.ID {
+	if t.ID != other.ID {
 		res = false
-		msg += fmt.Sprintf("ID is different %v vs %v\n", n.ID, other.ID)
+		msg += fmt.Sprintf("ID is different %v vs %v\n", t.ID, other.ID)
 	}
 
-	if !ignorePosition && n.Pos != other.Pos {
+	if !ignorePosition && t.Pos != other.Pos {
 		res = false
-		msg += fmt.Sprintf("Pos is different %v vs %v\n", n.Pos, other.Pos)
+		msg += fmt.Sprintf("Pos is different %v vs %v\n", t.Pos, other.Pos)
 	}
 
-	if n.Val != other.Val {
+	if t.Val != other.Val {
 		res = false
-		msg += fmt.Sprintf("Val is different %v vs %v\n", n.Val, other.Val)
+		msg += fmt.Sprintf("Val is different %v vs %v\n", t.Val, other.Val)
 	}
 
-	if n.Identifier != other.Identifier {
+	if t.Identifier != other.Identifier {
 		res = false
-		msg += fmt.Sprintf("Identifier is different %v vs %v\n", n.Identifier, other.Identifier)
+		msg += fmt.Sprintf("Identifier is different %v vs %v\n", t.Identifier, other.Identifier)
 	}
 
-	if !ignorePosition && n.Lline != other.Lline {
+	if !ignorePosition && t.Lline != other.Lline {
 		res = false
-		msg += fmt.Sprintf("Lline is different %v vs %v\n", n.Lline, other.Lline)
+		msg += fmt.Sprintf("Lline is different %v vs %v\n", t.Lline, other.Lline)
 	}
 
-	if !ignorePosition && n.Lpos != other.Lpos {
+	if !ignorePosition && t.Lpos != other.Lpos {
 		res = false
-		msg += fmt.Sprintf("Lpos is different %v vs %v\n", n.Lpos, other.Lpos)
+		msg += fmt.Sprintf("Lpos is different %v vs %v\n", t.Lpos, other.Lpos)
 	}
 
 	if msg != "" {
 		var buf bytes.Buffer
-		out, _ := json.MarshalIndent(n, "", "  ")
+		out, _ := json.MarshalIndent(t, "", "  ")
 		buf.WriteString(string(out))
 		buf.WriteString("\nvs\n")
 		out, _ = json.MarshalIndent(other, "", "  ")

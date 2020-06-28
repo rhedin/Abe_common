@@ -241,7 +241,7 @@ number: 1 # test
 	if _, err := ASTFromJSONObject(map[string]interface{}{
 		"name": "foo",
 		"children": []map[string]interface{}{
-			map[string]interface{}{
+			{
 				"value": "bar",
 			},
 		},
@@ -262,7 +262,7 @@ number: 1 # test
 	if ast, err := ASTFromJSONObject(map[string]interface{}{
 		"name": "foo",
 		"children": []map[string]interface{}{
-			map[string]interface{}{
+			{
 				"name": "bar",
 			},
 		},

@@ -13,6 +13,27 @@ import (
 	"testing"
 )
 
+func TestErrorHandling(t *testing.T) {
+
+	input := "c:= a + b"
+
+	astres, err := ParseWithRuntime("mytest", input, &DummyRuntimeProvider{})
+	if err != nil {
+		t.Errorf("Unexpected parser output:\n%vError: %v", astres, err)
+		return
+	}
+
+	// Make ast invalid
+
+	astres.Children[1].Children[1] = nil
+
+	ppres, err := PrettyPrint(astres)
+	if err == nil || err.Error() != "Nil pointer in AST at level: 2" {
+		t.Errorf("Unexpected result: %v error: %v", ppres, err)
+		return
+	}
+}
+
 func TestArithmeticExpressionPrinting(t *testing.T) {
 
 	input := "a + b * 5 /2-1"

@@ -125,3 +125,48 @@ number: 1 #  foo   foo bar
 		return
 	}
 }
+
+func TestErrorConditions(t *testing.T) {
+
+	input := ``
+	if ast, err := Parse("test", input); err == nil || err.Error() != "Parse error in test: Unexpected end" {
+		t.Errorf("Unexpected result: %v\nAST:\n%v", err, ast)
+		return
+	}
+
+	input = `a := 1 a`
+	if ast, err := Parse("test", input); err == nil || err.Error() != `Parse error in test: Unexpected end (extra token id:7 ("a")) (Line:1 Pos:8)` {
+		t.Errorf("Unexpected result: %v\nAST:\n%v", err, ast)
+		return
+	}
+
+	tokenStringEntry := astNodeMap[TokenSTRING]
+	delete(astNodeMap, TokenSTRING)
+	defer func() {
+		astNodeMap[TokenSTRING] = tokenStringEntry
+	}()
+
+	input = `"foo"`
+	if ast, err := Parse("test", input); err == nil || err.Error() != `Parse error in test: Unknown term (id:5 ("foo")) (Line:1 Pos:1)` {
+		t.Errorf("Unexpected result: %v\nAST:\n%v", err, ast)
+		return
+	}
+
+	// Test parser functions
+
+	input = `a := 1 + a`
+
+	p := &parser{"test", nil, NewLABuffer(Lex("test", input), 3), nil}
+	node, _ := p.next()
+	p.node = node
+
+	if err := skipToken(p, TokenAND); err == nil || err.Error() != "Parse error in test: Unexpected term (a) (Line:1 Pos:1)" {
+		t.Errorf("Unexpected result: %v", err)
+		return
+	}
+
+	if err := acceptChild(p, node, TokenAND); err == nil || err.Error() != "Parse error in test: Unexpected term (a) (Line:1 Pos:1)" {
+		t.Errorf("Unexpected result: %v", err)
+		return
+	}
+}

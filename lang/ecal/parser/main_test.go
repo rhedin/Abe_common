@@ -81,8 +81,8 @@ func UnitTestParseWithPPResult(name string, input string, expectedPPRes string) 
 
 		if ok, msg := n.Equals(unmarshaledAST, false); !ok {
 			return nil, fmt.Errorf(
-				"Parsed AST is different from the unmarshaled AST.\n%v\n",
-				msg)
+				"Parsed AST is different from the unmarshaled AST."+
+					"\n%v\n", msg)
 		}
 	}
 

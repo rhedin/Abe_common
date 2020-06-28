@@ -89,7 +89,7 @@ func (n *ASTNode) instance(p *parser, t *LexToken) *ASTNode {
 }
 
 /*
-Equal checks if this AST data equals another AST data. Returns also a message describing
+Equals checks if this AST data equals another AST data. Returns also a message describing
 what is the found difference.
 */
 func (n *ASTNode) Equals(other *ASTNode, ignoreTokenPosition bool) (bool, string) {
@@ -218,7 +218,7 @@ func (n *ASTNode) levelString(indent int, buf *bytes.Buffer, printChildren int) 
 }
 
 /*
-ToJSON returns this ASTNode and all its children as a JSON object.
+ToJSONObject returns this ASTNode and all its children as a JSON object.
 */
 func (n *ASTNode) ToJSONObject() map[string]interface{} {
 	ret := make(map[string]interface{})
@@ -267,7 +267,7 @@ func (n *ASTNode) ToJSONObject() map[string]interface{} {
 }
 
 /*
-ASTFromPlain creates an AST from a JSON Object.
+ASTFromJSONObject creates an AST from a JSON Object.
 The following nested map structure is expected:
 
 	{
@@ -284,8 +284,9 @@ The following nested map structure is expected:
 func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
 	var astMeta []MetaData
 	var astChildren []*ASTNode
-	var nodeID LexTokenID = TokenANY
 	var pos, line, linepos int
+
+	nodeID := TokenANY
 
 	name, ok := jsonAST["name"]
 	if !ok {
@@ -393,7 +394,7 @@ func ASTFromJSONObject(jsonAST map[string]interface{}) (*ASTNode, error) {
 // =================
 
 /*
-ASTNode models a node in the AST
+LABuffer models a look-ahead buffer.
 */
 type LABuffer struct {
 	tokens chan LexToken
@@ -401,7 +402,7 @@ type LABuffer struct {
 }
 
 /*
-Create a new instance of this ASTNode which is connected to a concrete lexer token.
+NewLABuffer creates a new NewLABuffer instance.
 */
 func NewLABuffer(c chan LexToken, size int) *LABuffer {
 
