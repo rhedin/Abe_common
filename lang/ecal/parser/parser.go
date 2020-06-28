@@ -37,9 +37,7 @@ func init() {
 		TokenLIST:       {NodeLIST, nil, nil, nil, nil, 0, nil, nil},
 		TokenMAP:        {NodeMAP, nil, nil, nil, nil, 0, nil, nil},
 		TokenPARAMS:     {NodePARAMS, nil, nil, nil, nil, 0, nil, nil},
-		/*
-			TokenGUARD:      {NodeGUARD, nil, nil, nil, 0, nil, nil},
-		*/
+		TokenGUARD:      {NodeGUARD, nil, nil, nil, nil, 0, nil, nil},
 
 		// Condition operators
 
@@ -122,19 +120,17 @@ func init() {
 		TokenTRUE:  {NodeTRUE, nil, nil, nil, nil, 0, ndTerm, nil},
 		TokenNULL:  {NodeNULL, nil, nil, nil, nil, 0, ndTerm, nil},
 
-		/*
-			// Conditional statements
+		// Conditional statements
 
-			TokenIF
-			TokenELIF
-			TokenELSE
+		TokenIF:   {NodeIF, nil, nil, nil, nil, 0, ndGuard, nil},
+		TokenELIF: {"", nil, nil, nil, nil, 0, nil, nil},
+		TokenELSE: {"", nil, nil, nil, nil, 0, nil, nil},
 
-			// Loop statements
+		// Loop statements
 
-			TokenFOR
-			TokenBREAK
-			TokenCONTINUE
-		*/
+		TokenFOR:      {NodeLOOP, nil, nil, nil, nil, 0, ndLoop, nil},
+		TokenBREAK:    {NodeBREAK, nil, nil, nil, nil, 0, ndTerm, nil},
+		TokenCONTINUE: {NodeCONTINUE, nil, nil, nil, nil, 0, ndTerm, nil},
 	}
 }
 
@@ -657,6 +653,92 @@ func ndMap(p *parser, self *ASTNode) (*ASTNode, error) {
 	// Must have a closing brace
 
 	return st, skipToken(p, TokenRBRACE)
+}
+
+/*
+ndGuard is used to parse a conditional statement.
+*/
+func ndGuard(p *parser, self *ASTNode) (*ASTNode, error) {
+	var err error
+
+	parseGuardAndStatements := func() error {
+
+		// The brace starts statements while parsing the expression of an if statement
+
+		nodeMapEntryBak := astNodeMap[TokenLBRACE]
+		astNodeMap[TokenLBRACE] = &ASTNode{"", nil, nil, nil, nil, 0, parseInnerStatements, nil}
+
+		exp, err := p.run(0)
+
+		astNodeMap[TokenLBRACE] = nodeMapEntryBak
+
+		if err == nil {
+			g := astNodeMap[TokenGUARD].instance(p, nil)
+			g.Children = append(g.Children, exp)
+			self.Children = append(self.Children, g)
+
+			_, err = parseInnerStatements(p, self)
+		}
+
+		return err
+	}
+
+	if err = parseGuardAndStatements(); err == nil {
+
+		for err == nil && p.node.Token.ID == TokenELIF {
+
+			// Parse an elif
+
+			if err = skipToken(p, TokenELIF); err == nil {
+				err = parseGuardAndStatements()
+			}
+		}
+
+		if err == nil && p.node.Token.ID == TokenELSE {
+
+			// Parse else
+
+			if err = skipToken(p, TokenELSE); err == nil {
+				g := astNodeMap[TokenGUARD].instance(p, nil)
+				g.Children = append(g.Children, astNodeMap[TokenTRUE].instance(p, nil))
+				self.Children = append(self.Children, g)
+
+				_, err = parseInnerStatements(p, self)
+			}
+		}
+	}
+
+	return self, err
+}
+
+/*
+ndLoop is used to parse a loop statement.
+*/
+func ndLoop(p *parser, self *ASTNode) (*ASTNode, error) {
+
+	// The brace starts statements while parsing the expression of a for statement
+
+	nodeMapEntryBak := astNodeMap[TokenLBRACE]
+	astNodeMap[TokenLBRACE] = &ASTNode{"", nil, nil, nil, nil, 0, parseInnerStatements, nil}
+
+	exp, err := p.run(0)
+
+	astNodeMap[TokenLBRACE] = nodeMapEntryBak
+
+	if err == nil {
+		g := exp
+
+		if exp.Token.ID != TokenIN {
+			g = astNodeMap[TokenGUARD].instance(p, nil)
+			g.Children = append(g.Children, exp)
+		}
+
+		self.Children = append(self.Children, g)
+
+		_, err = parseInnerStatements(p, self)
+	}
+
+	return self, err
 }
 
 // Standard left denotation functions

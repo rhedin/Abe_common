@@ -44,6 +44,32 @@ func init() {
 		// TokenLIST - Special case (handled in code)
 		// TokenMAP - Special case (handled in code)
 		// TokenPARAMS - Special case (handled in code)
+		NodeGUARD + "_1": template.Must(template.New(NodeGUARD).Parse("{{.c1}}")),
+
+		// Condition operators
+
+		NodeGEQ + "_2": template.Must(template.New(NodeGEQ).Parse("{{.c1}} >= {{.c2}}")),
+		NodeLEQ + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} <= {{.c2}}")),
+		NodeNEQ + "_2": template.Must(template.New(NodeNEQ).Parse("{{.c1}} != {{.c2}}")),
+		NodeEQ + "_2":  template.Must(template.New(NodeEQ).Parse("{{.c1}} == {{.c2}}")),
+		NodeGT + "_2":  template.Must(template.New(NodeGT).Parse("{{.c1}} > {{.c2}}")),
+		NodeLT + "_2":  template.Must(template.New(NodeLT).Parse("{{.c1}} < {{.c2}}")),
+
+		// Separators
+
+		NodeKVP + "_2":    template.Must(template.New(NodeKVP).Parse("{{.c1}} : {{.c2}}")),
+		NodePRESET + "_2": template.Must(template.New(NodePRESET).Parse("{{.c1}}={{.c2}}")),
+
+		// Arithmetic operators
+
+		NodePLUS + "_1":   template.Must(template.New(NodePLUS).Parse("+{{.c1}}")),
+		NodePLUS + "_2":   template.Must(template.New(NodePLUS).Parse("{{.c1}} + {{.c2}}")),
+		NodeMINUS + "_1":  template.Must(template.New(NodeMINUS).Parse("-{{.c1}}")),
+		NodeMINUS + "_2":  template.Must(template.New(NodeMINUS).Parse("{{.c1}} - {{.c2}}")),
+		NodeTIMES + "_2":  template.Must(template.New(NodeTIMES).Parse("{{.c1}} * {{.c2}}")),
+		NodeDIV + "_2":    template.Must(template.New(NodeDIV).Parse("{{.c1}} / {{.c2}}")),
+		NodeMODINT + "_2": template.Must(template.New(NodeMODINT).Parse("{{.c1}} % {{.c2}}")),
+		NodeDIVINT + "_2": template.Must(template.New(NodeDIVINT).Parse("{{.c1}} // {{.c2}}")),
 
 		// Assignment statement
 
@@ -61,17 +87,6 @@ func init() {
 		NodeSTATEMATCH + "_1": template.Must(template.New(NodeSTATEMATCH).Parse("statematch {{.c1}}")),
 		NodePRIORITY + "_1":   template.Must(template.New(NodePRIORITY).Parse("priority {{.c1}}")),
 		NodeSUPPRESSES + "_1": template.Must(template.New(NodeSUPPRESSES).Parse("suppresses {{.c1}}")),
-
-		// Arithmetic operators
-
-		NodePLUS + "_1":   template.Must(template.New(NodePLUS).Parse("+{{.c1}}")),
-		NodePLUS + "_2":   template.Must(template.New(NodePLUS).Parse("{{.c1}} + {{.c2}}")),
-		NodeMINUS + "_1":  template.Must(template.New(NodeMINUS).Parse("-{{.c1}}")),
-		NodeMINUS + "_2":  template.Must(template.New(NodeMINUS).Parse("{{.c1}} - {{.c2}}")),
-		NodeTIMES + "_2":  template.Must(template.New(NodeTIMES).Parse("{{.c1}} * {{.c2}}")),
-		NodeDIV + "_2":    template.Must(template.New(NodeDIV).Parse("{{.c1}} / {{.c2}}")),
-		NodeMODINT + "_2": template.Must(template.New(NodeMODINT).Parse("{{.c1}} % {{.c2}}")),
-		NodeDIVINT + "_2": template.Must(template.New(NodeDIVINT).Parse("{{.c1}} // {{.c2}}")),
 
 		// Function definition
 
@@ -93,23 +108,23 @@ func init() {
 		NodeHASSUFFIX + "_2": template.Must(template.New(NodeHASSUFFIX).Parse("{{.c1}} hassuffix {{.c2}}")),
 		NodeNOTIN + "_2":     template.Must(template.New(NodeNOTIN).Parse("{{.c1}} notin {{.c2}}")),
 
-		NodeGEQ + "_2": template.Must(template.New(NodeGEQ).Parse("{{.c1}} >= {{.c2}}")),
-		NodeLEQ + "_2": template.Must(template.New(NodeLEQ).Parse("{{.c1}} <= {{.c2}}")),
-		NodeNEQ + "_2": template.Must(template.New(NodeNEQ).Parse("{{.c1}} != {{.c2}}")),
-		NodeEQ + "_2":  template.Must(template.New(NodeEQ).Parse("{{.c1}} == {{.c2}}")),
-		NodeGT + "_2":  template.Must(template.New(NodeGT).Parse("{{.c1}} > {{.c2}}")),
-		NodeLT + "_2":  template.Must(template.New(NodeLT).Parse("{{.c1}} < {{.c2}}")),
-
-		// Separators
-
-		NodeKVP + "_2":    template.Must(template.New(NodeKVP).Parse("{{.c1}} : {{.c2}}")),
-		NodePRESET + "_2": template.Must(template.New(NodePRESET).Parse("{{.c1}}={{.c2}}")),
-
-		// Constants
+		// Constant terminals
 
 		NodeTRUE:  template.Must(template.New(NodeTRUE).Parse("true")),
 		NodeFALSE: template.Must(template.New(NodeFALSE).Parse("false")),
 		NodeNULL:  template.Must(template.New(NodeNULL).Parse("null")),
+
+		// Conditional statements
+
+		// TokenIF - Special case (handled in code)
+		// TokenELIF - Special case (handled in code)
+		// TokenELSE - Special case (handled in code)
+
+		// Loop statements
+
+		NodeLOOP + "_2": template.Must(template.New(NodeLOOP).Parse("for {{.c1}} {\n{{.c2}}}\n")),
+		NodeBREAK:       template.Must(template.New(NodeBREAK).Parse("break")),
+		NodeCONTINUE:    template.Must(template.New(NodeCONTINUE).Parse("continue")),
 	}
 
 	bracketPrecedenceMap = map[string]bool{
@@ -204,7 +219,7 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			buf.WriteString(tempParam[fmt.Sprint("c", len(ast.Children))])
 			buf.WriteString("}\n")
 
-			return buf.String(), nil
+			return ppMetaData(ast, buf.String()), nil
 
 		} else if ast.Name == NodeFUNCCALL {
 
@@ -237,6 +252,7 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			}
 
 			return ppMetaData(ast, buf.String()), nil
+
 		} else if ast.Name == NodeLIST {
 
 			buf.WriteString("[")
@@ -262,6 +278,7 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			buf.WriteString("}")
 
 			return ppMetaData(ast, buf.String()), nil
+
 		} else if ast.Name == NodePARAMS {
 
 			buf.WriteString("(")
@@ -272,6 +289,34 @@ func PrettyPrint(ast *ASTNode) (string, error) {
 			}
 			buf.WriteString(tempParam[fmt.Sprint("c", i)])
 			buf.WriteString(")")
+
+			return ppMetaData(ast, buf.String()), nil
+
+		} else if ast.Name == NodeIF {
+
+			writeGUARD := func(child int) {
+				buf.WriteString(tempParam[fmt.Sprint("c", child)])
+				buf.WriteString(" {\n")
+				buf.WriteString(tempParam[fmt.Sprint("c", child+1)])
+				buf.WriteString("}")
+			}
+
+			buf.WriteString("if ")
+
+			writeGUARD(1)
+
+			for i := 0; i < len(ast.Children); i += 2 {
+				if i+2 == len(ast.Children) && ast.Children[i].Children[0].Name == NodeTRUE {
+					buf.WriteString(" else {\n")
+					buf.WriteString(tempParam[fmt.Sprint("c", i+2)])
+					buf.WriteString("}")
+				} else if i > 0 {
+					buf.WriteString(" elif ")
+					writeGUARD(i + 1)
+				}
+			}
+
+			buf.WriteString("\n")
 
 			return ppMetaData(ast, buf.String()), nil
 		}

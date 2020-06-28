@@ -79,7 +79,7 @@ const (
 	TokenLIST       // List value
 	TokenMAP        // MAP value
 	TokenPARAMS     // Function parameters
-	TokenGUARD      // Guard expressions for conditional statements
+	TokenGUARD      // Conditional statements
 
 	TOKENodeSYMBOLS // Used to separate symbols from other tokens in this list
 
@@ -206,6 +206,7 @@ const (
 	NodeLIST       = "list"       // List value
 	NodeMAP        = "map"        // Map value
 	NodePARAMS     = "params"     // Function parameters
+	NodeGUARD      = "guard"      // Guard expressions for conditional statements
 
 	// Condition operators
 
@@ -272,18 +273,13 @@ const (
 	NodeFALSE = "false"
 	NodeNULL  = "null"
 
-/*
+	// Conditional statements
 
-	NodeGUARD      = "guard"      // Guard expressions for conditional statements
+	NodeIF = "if"
 
-	// Block statements
+	// Loop statements
 
-	NodeCOND = "cond"
-	NodeLOOP = "loop"
-
-	// Single statements
-
+	NodeLOOP     = "loop"
 	NodeBREAK    = "break"
 	NodeCONTINUE = "continue"
-*/
 )
