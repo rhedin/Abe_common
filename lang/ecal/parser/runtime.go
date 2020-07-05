@@ -53,7 +53,7 @@ type Scope interface {
 	/*
 	   Parent returns the parent scope or nil.
 	*/
-	Parent(name string) Scope
+	Parent() Scope
 
 	/*
 	   SetValue sets a new value for a variable.
