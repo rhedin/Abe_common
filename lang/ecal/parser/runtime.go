@@ -37,18 +37,23 @@ type Runtime interface {
 		The instance state is created per execution instance and can be used
 		for generator functions to store their current state.
 	*/
-	Eval(VarsScope, map[string]interface{}) (interface{}, error)
+	Eval(Scope, map[string]interface{}) (interface{}, error)
 }
 
 /*
-VarsScope is used to store variable data and keep track of scoping.
+Scope models an environment which stores data.
 */
-type VarsScope interface {
+type Scope interface {
 
 	/*
-	   NewChild creates a new child variable scope.
+	   NewChild creates a new child scope.
 	*/
-	NewChild(name string) VarsScope
+	NewChild(name string) Scope
+
+	/*
+	   Parent returns the parent scope or nil.
+	*/
+	Parent(name string) Scope
 
 	/*
 	   SetValue sets a new value for a variable.
@@ -61,7 +66,7 @@ type VarsScope interface {
 	GetValue(varName string) (interface{}, bool, error)
 
 	/*
-	   String returns a string representation of this variable scope.
+	   String returns a string representation of this scope.
 	*/
 	String() string
 }

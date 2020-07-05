@@ -12,7 +12,7 @@ Source code is Unicode text encoded in UTF-8. Single language statements are sep
 
 Constant values are usually enclosed in double quotes "" or single quotes '', both supporting escape sequences. Constant values can also be provided as raw strings prefixing a single or double quote with an 'r'. A raw string can contain any character including newlines and does not contain escape sequences.
 
-Blocks are denoted with curley brackets. Most language constructs (conditions, loops, etc.) are very similar to other languages.
+Blocks are denoted with curly brackets. Most language constructs (conditions, loops, etc.) are very similar to other languages.
 
 Scope and imports
 --
