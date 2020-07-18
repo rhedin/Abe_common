@@ -14,6 +14,40 @@ import (
 	"testing"
 )
 
+func TestAssignmentParsing(t *testing.T) {
+
+	input := `
+z := a.b[1].c["3"]["test"]
+[x, y] := a.b
+`
+	expectedOutput := `
+statements
+  :=
+    identifier: z
+    identifier: a
+      identifier: b
+        compaccess
+          number: 1
+        identifier: c
+          compaccess
+            string: '3'
+          compaccess
+            string: 'test'
+  :=
+    list
+      identifier: x
+      identifier: y
+    identifier: a
+      identifier: b
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+}
+
 func TestLoopParsing(t *testing.T) {
 
 	input := `

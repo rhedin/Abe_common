@@ -513,7 +513,11 @@ func ndIdentifier(p *parser, self *ASTNode) (*ASTNode, error) {
 			err = parseSegment(current)
 		} else if p.node.Token.ID == TokenLPAREN {
 			err = parseFuncCall(current)
-		} else if p.node.Token.ID == TokenLBRACK {
+		} else if p.node.Token.ID == TokenLBRACK && p.node.Token.Lline == self.Token.Lline {
+
+			// Composition access needs to be on the same line as the identifier
+			// as we might otherwise have a list
+
 			err = parseCompositionAccess(current)
 		}
 
