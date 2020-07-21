@@ -438,10 +438,13 @@ ndFunc is used to parse function definitions.
 */
 func ndFunc(p *parser, self *ASTNode) (*ASTNode, error) {
 	var exp *ASTNode
+	var err error
 
-	// Must specify a function name
+	// Might specify a function name
 
-	err := acceptChild(p, self, TokenIDENTIFIER)
+	if p.node.Token.ID == TokenIDENTIFIER {
+		err = acceptChild(p, self, TokenIDENTIFIER)
+	}
 
 	// Read in parameters
 

@@ -37,7 +37,7 @@ statements
 func TestSinkParsing(t *testing.T) {
 
 	input := `
-	sink fooBar 
+	sink fooBar
     kindmatch [ "priority", "t.do.bla" ],
 	scopematch [ "data.read", "data.write" ],
 	statematch { "priority:" : 5, test: 1, "bla 1": null },
@@ -114,7 +114,7 @@ sink
 	}
 
 	input = `
-	sink fooBar 
+	sink fooBar
     ==
 	kindmatch [ "priority", "t.do.bla" ]
 	{
@@ -177,6 +177,33 @@ func myfunc() {
 	expectedOutput = `
 function
   identifier: myfunc
+  params
+  statements
+    :=
+      identifier: a
+      number: 1
+    return
+    :=
+      identifier: b
+      number: 2
+    return
+`[1:]
+
+	if res, err := UnitTestParse("mytest", input); err != nil || fmt.Sprint(res) != expectedOutput {
+		t.Error("Unexpected parser output:\n", res, "expected was:\n", expectedOutput, "Error:", err)
+		return
+	}
+
+	input = `
+func() {
+  a := 1
+  return
+  b := 2
+  return
+}
+`
+	expectedOutput = `
+function
   params
   statements
     :=

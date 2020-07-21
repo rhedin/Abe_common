@@ -90,6 +90,7 @@ func init() {
 
 		// Function definition
 
+		NodeFUNC + "_2":   template.Must(template.New(NodeFUNC).Parse("func {{.c1}} {\n{{.c2}}}")),
 		NodeFUNC + "_3":   template.Must(template.New(NodeFUNC).Parse("func {{.c1}}{{.c2}} {\n{{.c3}}}")),
 		NodeRETURN:        template.Must(template.New(NodeRETURN).Parse("return")),
 		NodeRETURN + "_1": template.Must(template.New(NodeRETURN).Parse("return {{.c1}}")),
