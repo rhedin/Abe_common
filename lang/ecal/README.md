@@ -247,3 +247,75 @@ if a == 1 {
     a := 99
 }
 ```
+
+Build-in Functions
+--
+ECAL has a number of function which are build-in that are always available:
+
+#### `range([start], end, [step]) : <iterator>`
+Range function which can be used to iterate over number ranges. The parameters start and step are optional.
+
+Parameter | Description
+-|-
+start | Start of the number range (first returned number)
+end | End of the range (last returned number within step)
+step | Difference between each number (can be negative)
+
+Example:
+```
+for i in range(10, 2, -2) {
+  ...
+}
+```
+
+#### `len(listormap) : number`
+Len returns the size of a list or map.
+
+Parameter | Description
+-|-
+listormap | A list or a map
+
+Example:
+```
+len([1,2,3])
+```
+
+#### `del(listormap, indexorkey) : listormap`
+Del removes an item from a list or map.
+
+Parameter | Description
+-|-
+listormap | A list or a map
+indexorkey | The index of a list or key of a map which should be removed
+
+Example:
+```
+del([1,2,3], 1)
+```
+
+
+#### `add(list, value, [index]) : list`
+Add adds an item to a list. The item is added at the optionally given index or at the end if no index is specified.
+
+Parameter | Description
+-|-
+list | A list
+value | The value which should be added to the list
+index | The index at which the item should be added
+
+Example:
+```
+add([1,2,3], 1, 0)
+```
+
+#### `concat(list1, list2, [listn ...]) : list`
+Joins one or more lists together. The result is a new list.
+
+Parameter | Description
+-|-
+list1 ... n | Lists to join
+
+Example:
+```
+concat([1,2,3], [4,5,6], [7,8,9])
+```
