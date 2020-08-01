@@ -659,6 +659,23 @@ func ConvertToString(v interface{}) string {
 }
 
 /*
+ConvertToPrettyString tries to convert a given object into a stable human-readable
+string.
+*/
+func ConvertToPrettyString(v interface{}) string {
+	var res []byte
+	var err error
+
+	if res, err = json.MarshalIndent(v, "", "  "); err != nil {
+		if res, err = json.MarshalIndent(containerStringConvert(v), "", "  "); err != nil {
+			res = []byte(fmt.Sprint(v))
+		}
+	}
+
+	return string(res)
+}
+
+/*
 containerStringConvert converts container contents into strings.
 */
 func containerStringConvert(v interface{}) interface{} {

@@ -384,6 +384,106 @@ func TestConvertToString(t *testing.T) {
 	}
 }
 
+func TestConvertToPrettyString(t *testing.T) {
+
+	if res := ConvertToPrettyString(""); res != `""` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString("test"); res != `"test"` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString(4.123); res != "4.123" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToString(6); res != "6" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString(map[string]int{"z": 1, "d": 2, "a": 4}); res != `{
+  "a": 4,
+  "d": 2,
+  "z": 1
+}` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString([]int{1, 2, 3}); res != `[
+  1,
+  2,
+  3
+]` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString(map[interface{}]interface{}{"z": 1, "d": 2, "a": 4}); res != `{
+  "a": 4,
+  "d": 2,
+  "z": 1
+}` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString(map[interface{}]interface{}{"z": []interface{}{1, 2, 3}, "d": 2, "a": 4}); res != `{
+  "a": 4,
+  "d": 2,
+  "z": [
+    1,
+    2,
+    3
+  ]
+}` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString([]interface{}{1, sync.Mutex{}, 3}); res != `[
+  1,
+  {},
+  3
+]` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString([]interface{}{1, map[interface{}]interface{}{1: 2}, 3}); res != `[
+  1,
+  {
+    "1": 2
+  },
+  3
+]` {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := ConvertToPrettyString(&bytes.Buffer{}); res != "{}" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	// Not much to do with such a construct but we shouldn't fail!
+
+	type foo struct{ i int }
+
+	x := make(map[foo]foo)
+	x[foo{1}] = foo{2}
+
+	if res := ConvertToPrettyString(x); res != "map[{1}:{2}]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+}
+
 func TestMD5HexString(t *testing.T) {
 	res := MD5HexString("This is a test")
 	if res != "ce114e4501d2f4e2dcea3e17b546f339" {
