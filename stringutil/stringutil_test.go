@@ -694,3 +694,41 @@ foo
 	}
 
 }
+
+func TestCamelCaseSplit(t *testing.T) {
+
+	if res := fmt.Sprint(CamelCaseSplit("FooBar")); res != "[Foo Bar]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("FooB#ar")); res != "[Foo B # ar]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("fOObAR")); res != "[f O Ob AR]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("lower")); res != "[lower]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("foo1bar")); res != "[foo 1 bar]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("Low\xf2\xe6Er1")); res != "[Low\xf2\xe6Er1]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	if res := fmt.Sprint(CamelCaseSplit("ROCKHard")); res != "[ROCK Hard]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+}

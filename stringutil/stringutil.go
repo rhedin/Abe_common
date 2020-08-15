@@ -21,6 +21,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -724,4 +725,68 @@ func LengthConstantEquals(str1 []byte, str2 []byte) bool {
 	}
 
 	return diff == 0
+}
+
+/*
+CamelCaseSplit splits a camel case string into a slice.
+*/
+func CamelCaseSplit(src string) []string {
+	var result []string
+
+	if !utf8.ValidString(src) {
+		result = []string{src}
+
+	} else {
+
+		type rType int
+		const (
+			undefined rType = iota
+			lower
+			upper
+			digit
+			other
+		)
+
+		var current, previous rType
+		var runes [][]rune
+
+		for _, r := range src {
+			if unicode.IsLower(r) {
+				current = lower
+			} else if unicode.IsUpper(r) {
+				current = upper
+			} else if unicode.IsDigit(r) {
+				current = digit
+			} else {
+				current = other
+			}
+
+			if current == previous {
+				runes[len(runes)-1] = append(runes[len(runes)-1], r)
+			} else {
+				runes = append(runes, []rune{r})
+				previous = current
+			}
+		}
+
+		for i := 0; i < len(runes)-1; i++ {
+
+			// Detect cases like "ROCKH" "ard" and correct them to
+			// "ROCK" "Hard"
+
+			if unicode.IsUpper(runes[i][0]) && unicode.IsLower(runes[i+1][0]) {
+
+				runes[i+1] = append([]rune{runes[i][len(runes[i])-1]}, runes[i+1]...)
+				runes[i] = runes[i][:len(runes[i])-1]
+			}
+		}
+
+		for _, s := range runes {
+			if len(s) > 0 {
+				result = append(result, string(s))
+			}
+		}
+	}
+
+	return result
 }
