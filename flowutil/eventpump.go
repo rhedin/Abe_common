@@ -75,22 +75,29 @@ func (ep *EventPump) PostEvent(event string, eventSource interface{}) {
 		panic("Posting an event requires the event and its source")
 	}
 
-	ep.eventsObserversLock.Lock()
-	defer ep.eventsObserversLock.Unlock()
-
 	postEvent := func(event string, eventSource interface{}) {
 
-		if sources, ok := ep.eventsObservers[event]; ok {
+		ep.eventsObserversLock.Lock()
+		sources, ok := ep.eventsObservers[event]
+		if ok {
+			origsources := sources
+			sources = make(map[interface{}][]EventCallback)
+			for source, callbacks := range origsources {
+				sources[source] = callbacks
+			}
+		}
+		ep.eventsObserversLock.Unlock()
+
+		if ok {
 			for source, callbacks := range sources {
 				if source == eventSource || source == nil {
 					for _, callback := range callbacks {
-						ep.eventsObserversLock.Unlock()
 						callback(event, eventSource)
-						ep.eventsObserversLock.Lock()
 					}
 				}
 			}
 		}
+
 	}
 
 	postEvent(event, eventSource)
