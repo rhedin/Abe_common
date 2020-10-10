@@ -790,3 +790,45 @@ func CamelCaseSplit(src string) []string {
 
 	return result
 }
+
+/*
+ChunkSplit splits a string into chunks of a defined size. Attempts to only split
+at white space characters if spaceSplit is set.
+*/
+func ChunkSplit(s string, size int, spaceSplit bool) []string {
+	var res []string
+	var cl, wpos int
+
+	if size >= len(s) {
+		return []string{s}
+	}
+
+	chunk := make([]rune, size)
+
+	for _, r := range s {
+		chunk[cl] = r
+		cl++
+
+		if spaceSplit && unicode.IsSpace(r) {
+			wpos = cl
+		}
+
+		if cl == size {
+			if !spaceSplit || wpos == 0 {
+				res = append(res, string(chunk))
+				cl = 0
+			} else {
+				res = append(res, string(chunk[:wpos]))
+				copy(chunk, chunk[wpos:])
+				cl = len(chunk[wpos:])
+				wpos = 0
+			}
+		}
+	}
+
+	if cl > 0 {
+		res = append(res, string(chunk[:cl]))
+	}
+
+	return res
+}

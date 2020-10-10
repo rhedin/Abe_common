@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -729,6 +730,54 @@ func TestCamelCaseSplit(t *testing.T) {
 
 	if res := fmt.Sprint(CamelCaseSplit("ROCKHard")); res != "[ROCK Hard]" {
 		t.Error("Unexpected result:", res)
+		return
+	}
+}
+
+func TestChunkSplit(t *testing.T) {
+	if res := fmt.Sprint(ChunkSplit("Foobar tester fooooo", 4, false)); res != "[Foob ar t este r fo oooo]" {
+		t.Error("Unexpected result:", res)
+		return
+	}
+
+	resSplit := ChunkSplit("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", 15, true)
+
+	if res := strings.Join(resSplit, "\n"); res != `
+Lorem ipsum 
+dolor sit 
+amet, 
+consectetur 
+adipiscing 
+elit, sed do 
+eiusmod tempor 
+incididunt ut 
+labore et 
+dolore magna 
+aliqua.`[1:] {
+		t.Errorf("Unexpected result:\n===============\n#%v#", res)
+		return
+	}
+
+	resSplit = ChunkSplit("Loremipsumdolorsitamet,consecteturadipiscingelit,seddoeiusmodtemporincididunt ut labore etdoloremagnaaliqua.", 15, true)
+
+	if res := strings.Join(resSplit, "\n"); res != `
+Loremipsumdolor
+sitamet,consect
+eturadipiscinge
+lit,seddoeiusmo
+dtemporincididu
+nt ut labore 
+etdoloremagnaal
+iqua.`[1:] {
+		t.Errorf("Unexpected result:\n===============\n#%v#", res)
+		return
+	}
+
+	resSplit = ChunkSplit("Lor", 15, true)
+
+	if res := strings.Join(resSplit, "\n"); res != `
+Lor`[1:] {
+		t.Errorf("Unexpected result:\n===============\n#%v#", res)
 		return
 	}
 }
