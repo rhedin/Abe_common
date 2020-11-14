@@ -647,7 +647,7 @@ func ConvertToString(v interface{}) string {
 	}
 
 	if _, err := json.Marshal(v); err != nil {
-		v = containerStringConvert(v)
+		v = ConvertToJSONMarshalableObject(v)
 	}
 
 	if vString, ok := v.(string); ok {
@@ -668,7 +668,7 @@ func ConvertToPrettyString(v interface{}) string {
 	var err error
 
 	if res, err = json.MarshalIndent(v, "", "  "); err != nil {
-		if res, err = json.MarshalIndent(containerStringConvert(v), "", "  "); err != nil {
+		if res, err = json.MarshalIndent(ConvertToJSONMarshalableObject(v), "", "  "); err != nil {
 			res = []byte(fmt.Sprint(v))
 		}
 	}
@@ -677,16 +677,17 @@ func ConvertToPrettyString(v interface{}) string {
 }
 
 /*
-containerStringConvert converts container contents into strings.
+ConvertToJSONMarshalableObject converts container contents into objects which
+can be converted into JSON strings.
 */
-func containerStringConvert(v interface{}) interface{} {
+func ConvertToJSONMarshalableObject(v interface{}) interface{} {
 	res := v
 
 	if mapContainer, ok := v.(map[interface{}]interface{}); ok {
 		newRes := make(map[string]interface{})
 
 		for mk, mv := range mapContainer {
-			newRes[ConvertToString(mk)] = containerStringConvert(mv)
+			newRes[ConvertToString(mk)] = ConvertToJSONMarshalableObject(mv)
 		}
 
 		res = newRes
@@ -695,7 +696,7 @@ func containerStringConvert(v interface{}) interface{} {
 		newRes := make([]interface{}, len(mapList))
 
 		for i, lv := range mapList {
-			newRes[i] = containerStringConvert(lv)
+			newRes[i] = ConvertToJSONMarshalableObject(lv)
 		}
 
 		res = newRes
