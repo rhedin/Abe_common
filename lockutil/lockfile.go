@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -32,13 +33,14 @@ type LockFile struct {
 	interval  time.Duration // Interval with which the file should be watched
 	errorChan chan error    // Error communication channel with watcher goroutine
 	running   bool          // Flag to indicate that a lockfile is being watched
+	mutex     *sync.Mutex
 }
 
 /*
 NewLockFile creates a new LockFile which and watch it in given intervals.
 */
 func NewLockFile(filename string, interval time.Duration) *LockFile {
-	return &LockFile{filename, time.Now().UnixNano(), interval, nil, false}
+	return &LockFile{filename, time.Now().UnixNano(), interval, nil, false, &sync.Mutex{}}
 }
 
 /*
@@ -76,10 +78,10 @@ func (lf *LockFile) watch() {
 
 	// Signal that all is well
 
-	lf.running = true
+	lf.SetWatcherRunning(true)
 	lf.errorChan <- nil
 
-	for lf.running {
+	for lf.WatcherRunning() {
 
 		// Wakeup every interval and read the file
 
@@ -90,7 +92,7 @@ func (lf *LockFile) watch() {
 
 			// Shut down if we get an error back
 
-			lf.running = false
+			lf.SetWatcherRunning(false)
 			lf.errorChan <- err
 
 			return
@@ -114,6 +116,9 @@ func (lf *LockFile) watch() {
 Write a timestamp to the lockfile
 */
 func (lf *LockFile) writeLockfile() error {
+	lf.mutex.Lock()
+	defer lf.mutex.Unlock()
+
 	file, err := os.OpenFile(lf.filename, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0660)
 	if err != nil {
 		return err
@@ -140,6 +145,9 @@ func (lf *LockFile) writeLockfile() error {
 Try to read a timestamp from a lockfile
 */
 func (lf *LockFile) checkLockfile() (int64, error) {
+	lf.mutex.Lock()
+	defer lf.mutex.Unlock()
+
 	file, err := os.OpenFile(lf.filename, os.O_RDONLY, 0660)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -174,7 +182,7 @@ func (lf *LockFile) Start() error {
 
 	// Do nothing if the lockfile is already being watched
 
-	if lf.running {
+	if lf.WatcherRunning() {
 		return nil
 	}
 
@@ -191,7 +199,20 @@ func (lf *LockFile) Start() error {
 WatcherRunning returns if the watcher goroutine is running.
 */
 func (lf *LockFile) WatcherRunning() bool {
+	lf.mutex.Lock()
+	defer lf.mutex.Unlock()
+
 	return lf.running
+}
+
+/*
+SetWatcherRunning sets if the watcher goroutine is running.
+*/
+func (lf *LockFile) SetWatcherRunning(state bool) {
+	lf.mutex.Lock()
+	defer lf.mutex.Unlock()
+
+	lf.running = state
 }
 
 /*
@@ -202,7 +223,7 @@ func (lf *LockFile) Finish() error {
 
 	// Do nothing if the lockfile is not being watched
 
-	if !lf.running {
+	if !lf.WatcherRunning() {
 
 		// Clean up if there is a channel still open
 
@@ -216,7 +237,7 @@ func (lf *LockFile) Finish() error {
 
 	// Signale the watcher goroutine to stop
 
-	lf.running = false
+	lf.SetWatcherRunning(false)
 
 	// Wait for the goroutine to finish
 

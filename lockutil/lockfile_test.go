@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -69,13 +70,13 @@ func TestLockFile(t *testing.T) {
 
 	// Simulate 2 process opening the same lockfile
 
-	lf1 := &LockFile{lfdir + "/test2.lck", 1, duration, nil, false}
+	lf1 := &LockFile{lfdir + "/test2.lck", 1, duration, nil, false, &sync.Mutex{}}
 	if err := lf1.Start(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	lf2 := &LockFile{lfdir + "/test2.lck", 2, duration, nil, false}
+	lf2 := &LockFile{lfdir + "/test2.lck", 2, duration, nil, false, &sync.Mutex{}}
 	if err := lf2.Start(); err == nil {
 		t.Error("Unexpected result while starting lockfile watch:", err)
 		return
@@ -88,13 +89,13 @@ func TestLockFile(t *testing.T) {
 
 	// Test error cases
 
-	lf3 := &LockFile{lfdir + "/" + invalidFileName, 1, duration, nil, false}
+	lf3 := &LockFile{lfdir + "/" + invalidFileName, 1, duration, nil, false, &sync.Mutex{}}
 	if err := lf3.Start(); err == nil {
 		t.Error("Unexpected result while starting lockfile watch:", err)
 		return
 	}
 
-	lf = &LockFile{lfdir + "/test3.lck", 1, duration, nil, false}
+	lf = &LockFile{lfdir + "/test3.lck", 1, duration, nil, false, &sync.Mutex{}}
 	if err := lf.Start(); err != nil {
 		t.Error(err)
 		return
@@ -131,7 +132,7 @@ func TestLockFile(t *testing.T) {
 	file.Write(make([]byte, 3))
 	file.Close()
 
-	lf = &LockFile{lfdir + "/test4.lck", 1, duration, nil, false}
+	lf = &LockFile{lfdir + "/test4.lck", 1, duration, nil, false, &sync.Mutex{}}
 	if _, err := lf.checkLockfile(); err == nil || err.Error() != "Unexpected timestamp value found in lockfile:[0 0 0 0 0 0 0 0]" {
 		t.Error("Unexpected checkLockfile result:", err)
 		return
