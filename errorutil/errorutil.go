@@ -12,7 +12,9 @@ Package errorutil contains common error objects and functions.
 */
 package errorutil
 
-import "strings"
+import (
+	"bytes"
+)
 
 /*
 AssertOk will panic on any non-nil error parameter.
@@ -36,21 +38,21 @@ func AssertTrue(condition bool, errString string) {
 CompositeError can collect multiple errors in a single error object.
 */
 type CompositeError struct {
-	Errors []string
+	Errors []error
 }
 
 /*
 NewCompositeError creates a new composite error object.
 */
 func NewCompositeError() *CompositeError {
-	return &CompositeError{make([]string, 0)}
+	return &CompositeError{make([]error, 0)}
 }
 
 /*
 Add adds an error.
 */
 func (ce *CompositeError) Add(e error) {
-	ce.Errors = append(ce.Errors, e.Error())
+	ce.Errors = append(ce.Errors, e)
 }
 
 /*
@@ -64,5 +66,12 @@ func (ce *CompositeError) HasErrors() bool {
 Error returns all collected errors as a string.
 */
 func (ce *CompositeError) Error() string {
-	return strings.Join(ce.Errors, "; ")
+	var buf bytes.Buffer
+	for i, e := range ce.Errors {
+		buf.WriteString(e.Error())
+		if i < len(ce.Errors)-1 {
+			buf.WriteString("; ")
+		}
+	}
+	return buf.String()
 }
