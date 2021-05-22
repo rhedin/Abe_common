@@ -1,6 +1,9 @@
 Common
 --
-Common is a collection of common algorithms and functions which are used across a multitude of projects on devt.de.
+Common is a collection of common algorithms and functions. The code is public domain so feel free to use it as you like - attribution is not necessary but always appreciated :-)
+
+[![Go Report Card](https://goreportcard.com/badge/devt.de/krotik/common?style=flat-square)](https://goreportcard.com/report/devt.de/krotik/common)
+[![Go Reference](https://pkg.go.dev/badge/krotik/common.svg)](https://pkg.go.dev/devt.de/krotik/common)
 
 |Package|Description|
 | --- | --- |
