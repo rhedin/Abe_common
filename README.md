@@ -10,7 +10,6 @@ Common is a collection of common algorithms and functions. The code is public do
 | bitutil | Byte processing helper functions. |
 | cryptutil | Processing certificates, uuids and encryption/decryption helpers. |
 | datautil | Datastructures and data storage helpers. |
-| defs | Definition used across devt.de projects. |
 | errorutil | Helper functions around error processing. |
 | fileutil | File handling utilities. |
 | flowutil | Datastructures for flow control. |
