@@ -10,8 +10,10 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -538,6 +540,24 @@ Document
 		t.Error("Unexpected result:", astres)
 		return
 	}
+
+	plainAST := astres.Plain()
+
+	plainAST["children"].([]map[string]interface{})[0]["name"] = "Value"
+	_, err = ASTFromPlain(plainAST)
+
+	if err == nil || err.Error() != "Found plain ast value node without a value: Value" {
+		t.Error("Unexpected result:", err)
+		return
+	}
+
+	delete(plainAST["children"].([]map[string]interface{})[0], "name")
+	_, err = ASTFromPlain(plainAST)
+
+	if err == nil || !strings.HasPrefix(err.Error(), "Found plain ast node without a name") {
+		t.Error("Unexpected result:", err)
+		return
+	}
 }
 
 func testPPOut(input string) (string, error) {
@@ -570,6 +590,24 @@ func testPrettyPrinting(input, astOutput, ppOutput string) error {
 	astres2, err := ParseWithRuntime("mytest", ppres, &TestRuntimeProvider{})
 	if err != nil || fmt.Sprint(astres2) != astOutput {
 		return fmt.Errorf("Unexpected parser output from pretty print string:\n%v expected was:\n%v Error: %v", astres2, astOutput, err)
+	}
+
+	mAST, _ := json.Marshal(astres2.Plain())
+	var plainAST interface{}
+	json.Unmarshal(mAST, &plainAST)
+
+	ast, err := ASTFromPlain(plainAST.(map[string]interface{}))
+	if err != nil {
+		return fmt.Errorf("Could not build AST from plain AST: %v", err)
+	}
+
+	ppres2, err := PrettyPrint(ast)
+	if err != nil {
+		return fmt.Errorf("Could not pretty print plain AST: %v", err)
+	}
+
+	if ppres != ppres2 {
+		return fmt.Errorf("Unexpected pretty print - normal:\n%v\nFrom plain:\n%v", ppres, ppres2)
 	}
 
 	return nil
