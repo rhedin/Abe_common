@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"devt.de/krotik/common/fileutil"
+	"github.com/rhedin/Abe_common/fileutil"
 )
 
 /*

@@ -31,7 +31,8 @@ func TestGetCaller(t *testing.T) {
 
 	// Answer should be TestGetCaller in file testutil_test.go line 30
 
-	if !strings.Contains(name, "devt.de/krotik/common/testutil.TestGetCaller") {
+	// if !strings.Contains(name, "devt.de/krotik/common/testutil.TestGetCaller") {  Changed by Rick 251227
+	if !strings.Contains(name, "github.com/rhedin/Abe_common/testutil.TestGetCaller") {
 		t.Error("Unexpected result:", name)
 	}
 

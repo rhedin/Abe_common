@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"devt.de/krotik/common/httputil"
-	"devt.de/krotik/common/httputil/user"
+	"github.com/rhedin/Abe_common/httputil"
+	"github.com/rhedin/Abe_common/httputil/user"
 )
 
 func TestCookieAuth(t *testing.T) {

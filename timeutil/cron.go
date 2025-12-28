@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"devt.de/krotik/common/errorutil"
+	"github.com/rhedin/Abe_common/errorutil"
 )
 
 /*

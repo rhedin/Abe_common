@@ -15,10 +15,10 @@ import (
 	"os"
 	"strings"
 
-	"devt.de/krotik/common/datautil"
-	"devt.de/krotik/common/fileutil"
-	"devt.de/krotik/common/stringutil"
-	"devt.de/krotik/common/termutil/getch"
+	"github.com/rhedin/Abe_common/datautil"
+	"github.com/rhedin/Abe_common/fileutil"
+	"github.com/rhedin/Abe_common/stringutil"
+	"github.com/rhedin/Abe_common/termutil/getch"
 )
 
 /*

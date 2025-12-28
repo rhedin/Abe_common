@@ -19,7 +19,7 @@ import (
 	"strings"
 	"sync"
 
-	"devt.de/krotik/common/timeutil"
+	"github.com/rhedin/Abe_common/timeutil"
 )
 
 /*

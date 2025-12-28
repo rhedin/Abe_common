@@ -15,7 +15,7 @@ import (
 	"os"
 	"testing"
 
-	"devt.de/krotik/common/termutil/getch"
+	"github.com/rhedin/Abe_common/termutil/getch"
 )
 
 func TestHistoryConsoleLineTerminal(t *testing.T) {

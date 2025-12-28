@@ -16,7 +16,7 @@ import (
 	"bytes"
 	"encoding/gob"
 
-	"devt.de/krotik/common/pools"
+	"github.com/rhedin/Abe_common/pools"
 )
 
 /*

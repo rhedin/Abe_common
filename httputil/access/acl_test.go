@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"devt.de/krotik/common/fileutil"
+	"github.com/rhedin/Abe_common/fileutil"
 )
 
 func TestPersistedACLTable(t *testing.T) {

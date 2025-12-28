@@ -19,8 +19,8 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"devt.de/krotik/common/stringutil"
-	"devt.de/krotik/common/termutil/getch"
+	"github.com/rhedin/Abe_common/stringutil"
+	"github.com/rhedin/Abe_common/termutil/getch"
 )
 
 /*

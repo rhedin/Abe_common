@@ -13,7 +13,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"devt.de/krotik/common/stringutil"
+	"github.com/rhedin/Abe_common/stringutil"
 )
 
 /*

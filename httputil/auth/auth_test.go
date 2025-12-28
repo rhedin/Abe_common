@@ -12,9 +12,9 @@ import (
 	"sync"
 	"testing"
 
-	"devt.de/krotik/common/errorutil"
-	"devt.de/krotik/common/httputil"
-	"devt.de/krotik/common/httputil/user"
+	"github.com/rhedin/Abe_common/errorutil"
+	"github.com/rhedin/Abe_common/httputil"
+	"github.com/rhedin/Abe_common/httputil/user"
 )
 
 const TESTPORT = ":9090"

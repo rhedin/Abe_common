@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"devt.de/krotik/common/testutil"
-	"devt.de/krotik/common/timeutil"
+	"github.com/rhedin/Abe_common/testutil"
+	"github.com/rhedin/Abe_common/timeutil"
 )
 
 /*

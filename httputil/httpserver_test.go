@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"devt.de/krotik/common/cryptutil"
-	"devt.de/krotik/common/fileutil"
+	"github.com/rhedin/Abe_common/cryptutil"
+	"github.com/rhedin/Abe_common/fileutil"
 )
 
 const certdir = "certs"

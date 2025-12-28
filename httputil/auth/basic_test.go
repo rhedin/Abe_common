@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"devt.de/krotik/common/httputil/user"
+	"github.com/rhedin/Abe_common/httputil/user"
 )
 
 func TestBasicAuth(t *testing.T) {

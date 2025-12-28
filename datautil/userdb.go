@@ -27,10 +27,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"devt.de/krotik/common/cryptutil"
-	"devt.de/krotik/common/errorutil"
-	"devt.de/krotik/common/fileutil"
-	"devt.de/krotik/common/stringutil"
+	"github.com/rhedin/Abe_common/cryptutil"
+	"github.com/rhedin/Abe_common/errorutil"
+	"github.com/rhedin/Abe_common/fileutil"
+	"github.com/rhedin/Abe_common/stringutil"
 )
 
 /*

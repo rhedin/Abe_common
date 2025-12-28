@@ -12,7 +12,7 @@ package parser
 import (
 	"fmt"
 
-	"devt.de/krotik/common/errorutil"
+	"github.com/rhedin/Abe_common/errorutil"
 )
 
 // Parser Rules

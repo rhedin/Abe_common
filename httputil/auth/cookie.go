@@ -16,9 +16,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"devt.de/krotik/common/datautil"
-	"devt.de/krotik/common/errorutil"
-	"devt.de/krotik/common/httputil/user"
+	"github.com/rhedin/Abe_common/datautil"
+	"github.com/rhedin/Abe_common/errorutil"
+	"github.com/rhedin/Abe_common/httputil/user"
 )
 
 /*

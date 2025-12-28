@@ -12,7 +12,7 @@ package cryptutil
 import (
 	"crypto/rand"
 
-	"devt.de/krotik/common/errorutil"
+	"github.com/rhedin/Abe_common/errorutil"
 )
 
 /*

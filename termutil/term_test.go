@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"testing"
 
-	"devt.de/krotik/common/termutil/getch"
+	"github.com/rhedin/Abe_common/termutil/getch"
 )
 
 func TestConsoleLineTerminal(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"devt.de/krotik/common/fileutil"
+	"github.com/rhedin/Abe_common/fileutil"
 )
 
 import (

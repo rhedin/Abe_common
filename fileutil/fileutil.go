@@ -16,8 +16,8 @@ import (
 	"io"
 	"os"
 
-	"devt.de/krotik/common/bitutil"
-	"devt.de/krotik/common/pools"
+	"github.com/rhedin/Abe_common/bitutil"
+	"github.com/rhedin/Abe_common/pools"
 )
 
 /*

@@ -12,7 +12,7 @@ package datautil
 import (
 	"testing"
 
-	"devt.de/krotik/common/testutil"
+	"github.com/rhedin/Abe_common/testutil"
 )
 
 func TestMergeMaps(t *testing.T) {

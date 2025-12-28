@@ -14,8 +14,8 @@ import (
 	"errors"
 	"fmt"
 
-	"devt.de/krotik/common/cryptutil"
-	"devt.de/krotik/common/timeutil"
+	"github.com/rhedin/Abe_common/cryptutil"
+	"github.com/rhedin/Abe_common/timeutil"
 )
 
 /*
