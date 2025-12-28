@@ -8,8 +8,11 @@ The other of these shows your code in a package directory for other people to fi
 Let's wait until we get the paths changed over entirely, and then see how it looks. 
 The package index at least seems to require an extra step to get one's package registered. 
 -->
+<!--
+Experimentally removing these lines. 
 [![Go Report Card](https://goreportcard.com/badge/devt.de/krotik/common?style=flat-square)](https://goreportcard.com/report/devt.de/krotik/common)
 [![Go Reference](https://pkg.go.dev/badge/krotik/common.svg)](https://pkg.go.dev/devt.de/krotik/common)
+-->
 
 |Package|Description|
 | --- | --- |
