@@ -1,0 +1,8 @@
+In other cases, just putting a prefix of Abe_ in front of it was enough. 
+Abe_eliasdb, Abe_ecal -- it's clear that these are Abe versions of 
+things that exist elsewhere.  But Abe_common -- common to what?  Lots of 
+things can be held in common. 
+It should be named Abe_krotik_common to make it clear that it goes 
+along with krotik/eliasdb and krotik/ecal.  But that name is too 
+long and cumbersome.  So we're calling it just Abe_common, but know 
+that name is wrong. 
