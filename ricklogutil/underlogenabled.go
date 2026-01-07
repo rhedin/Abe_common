@@ -1,0 +1,11 @@
+//go:build underlog
+// +build underlog
+
+package ricklogutil
+
+import (
+	"log"
+	"os"
+)
+
+var Underlog = log.New(os.Stdout, "Understand:", log.Ldate|log.Ltime|log.Lshortfile)
