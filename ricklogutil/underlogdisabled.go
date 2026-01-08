@@ -1,4 +1,5 @@
-/* // +build !underlog */
+//go:build !underlog
+// +build !underlog
 
 package ricklogutil
 
