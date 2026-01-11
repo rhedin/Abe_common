@@ -2,7 +2,7 @@
 
 package abelogutil
 
-var UnderEnabled = false
+const UnderEnabled = false
 
 func UnderPrintf(format string, arguments ...any) {
 	// Do nothing.
