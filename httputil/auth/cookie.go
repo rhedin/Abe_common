@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 
+	abelog "github.com/rhedin/Abe_common/abelogutil"
 	"github.com/rhedin/Abe_common/datautil"
 	"github.com/rhedin/Abe_common/errorutil"
 	"github.com/rhedin/Abe_common/httputil/user"
@@ -233,6 +234,10 @@ HandleFunc is the new handle func which wraps an original handle functions to do
 */
 func (cw *CookieAuthHandleFuncWrapper) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 
+	abelog.UnderPrintf("\n")
+
+	// When I traced this through in the debugger, I ended up at /Users/rickhedin/.goenv/versions/1.25.4/src/net/http/server.go,
+	// line 2901, the HandleFunc function.  What is this thing?
 	cw.origHandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 
 		// Check if this is a public URL
@@ -279,6 +284,7 @@ func (cw *CookieAuthHandleFuncWrapper) HandleFunc(pattern string, handler func(h
 
 						// Handle the request
 
+						abelog.UnderPrintf("\n")
 						handler(w, r)
 					}
 

@@ -34,7 +34,11 @@ const certdir = "certs"
 const testporthttp = ":9050"
 const testporthttps = ":9051"
 
+/***
+const "invalidFileName" is unused unusedfunc(default) [Ln 40, Col 7]
+Got a message from, I believe, gopls.
 const invalidFileName = "**\x00"
+***/
 
 func TestMain(m *testing.M) {
 	flag.Parse()
