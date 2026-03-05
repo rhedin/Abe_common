@@ -58,7 +58,7 @@ func UnderPrintf(format string, arguments ...any) {
 	whoCalledThem, more := frames.Next()
 	if !more {
 		fmt.Printf("We do not have information about the caller of our caller.\n")
-		fmt.Printf("Leaving UnderPrintf early.")
+		fmt.Printf("Leaving UnderPrintf early.\n")
 	}
 	var builder strings.Builder
 	builder.WriteString(time.Now().Format("15:04:05.000"))
