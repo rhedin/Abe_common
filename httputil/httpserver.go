@@ -150,14 +150,57 @@ runServer starts the actual server and notifies the wait group.
 */
 func (hs *HTTPServer) runServer(sl *signalTCPListener, wgStatus *sync.WaitGroup) error {
 
+	// I wanted to make a configuration entry like this:
+	//
+	// 	CORSAllowedOrigins:       ["*", "https://studio.apollographql.com"],
+	//
+	// But Grok insisted I had to do it like this:
+	//
+	// 	CORSAllowedOrigins:       "*,https://studio.apollographql.com",
+	//
+	// He said that if I were reading the information back in from the file,
+	// Go wouldn't have enough information to reconstruct an array of strings.
+	//
+	// Not sure that's true.  Grok suggested that I could take the current
+	// configuration stuff apart, and give everything explicit types.
+	//
+	// Used this complicated bit of code instead, to convert a comma-separated
+	// string into a slice of strings.  Aim for good, not great.  That's the
+	// new policy.  Have to get done.
+
+	var allowedOrigins []string
+
+	// 1. Read the string value from config
+	stringWithCommas := config.Str(config.CORSAllowedOrigins)
+
+	// 2. Split on commas
+	sliceOfStrings := strings.Split(stringWithCommas, ",")
+
+	// 3. Trim whitespace and filter empty entries
+	allowedOrigins = make([]string, 0, len(sliceOfStrings))
+	for _, indivString := range sliceOfStrings {
+		trimmedString := strings.TrimSpace(indivString)
+		if trimmedString != "" {
+			allowedOrigins = append(allowedOrigins, trimmedString)
+		}
+	}
+
+	// 4. Fallback if everything was empty after trimming
+	if len(allowedOrigins) == 0 {
+		fmt.Printf("CORSAllowedOrigins configuration is wrong.\n")
+		// I hate to "fall back" to a possibly inappropriate value,
+		// but at least we logged that there was a problem.
+		allowedOrigins = []string{"*"}
+	}
+
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*", "https://studio.apollographql.com"},
+		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
 		MaxAge:           300,
-		Debug:            true, // remove or set false in production
+		Debug:            config.Bool(config.CORSDebug),
 	})
 
 	// Wrap the default mux
