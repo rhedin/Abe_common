@@ -17,6 +17,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/rhedin/Abe_eliasdb/config"
 	"github.com/rs/cors"
 	"net"
 	"net/http"
@@ -133,9 +134,9 @@ func (hs *HTTPServer) RunHTTPSServer(keypath string, certFile string, keyFile st
 
 	// Wrap the listener in a TLS listener
 
-	config := tls.Config{Certificates: []tls.Certificate{cert}}
+	tlsConfig := tls.Config{Certificates: []tls.Certificate{cert}}
 
-	originalTLSListener := tls.NewListener(originalListener, &config)
+	originalTLSListener := tls.NewListener(originalListener, &tlsConfig)
 
 	// Wrap listeners in a signal aware listener
 
