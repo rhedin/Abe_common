@@ -17,6 +17,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/rs/cors"
 	"net"
 	"net/http"
 	"os"
@@ -148,9 +149,26 @@ runServer starts the actual server and notifies the wait group.
 */
 func (hs *HTTPServer) runServer(sl *signalTCPListener, wgStatus *sync.WaitGroup) error {
 
-	// Use the http server from the standard library
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*", "https://studio.apollographql.com"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+		Debug:            true, // remove or set false in production
+	})
 
-	server := http.Server{}
+	// Wrap the default mux
+	corsHandler := c.Handler(http.DefaultServeMux)
+
+	// Use the http server from the standard library
+	// If we had left the braces empty, it would have used
+	// the default multiplexed server.  We want it to use
+	// our wrapper around DefaultServerMux.
+	server := http.Server{
+		Handler: corsHandler,
+	}
 
 	// Attach SIGINT handler - on unix and windows this is send
 	// when the user presses ^C (Control-C).
