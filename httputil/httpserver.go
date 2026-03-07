@@ -17,6 +17,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	abelog "github.com/rhedin/Abe_common/abelogutil"
 	"github.com/rhedin/Abe_eliasdb/config"
 	"github.com/rs/cors"
 	"net"
@@ -192,6 +193,14 @@ func (hs *HTTPServer) runServer(sl *signalTCPListener, wgStatus *sync.WaitGroup)
 		// but at least we logged that there was a problem.
 		allowedOrigins = []string{"*"}
 	}
+
+	abelog.UnderPrintf("allowedOrigins = %v\n", allowedOrigins)
+	if abelog.UnderEnabled {
+		for index, origin := range allowedOrigins {
+			fmt.Printf("     %d. -->%s<--\n", index, origin)
+		}
+	}
+	// I wasn't sure I was understanding how Go printed slices using %v.
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   allowedOrigins,

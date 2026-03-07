@@ -129,8 +129,51 @@ func FormatQuery(requestString string) string {
 	fmt.Printf("lastLine = -->%s<--\n", lastLine)
 
 	if !strings.HasPrefix(lastLine, `{"operationName":`) {
-		return "I can't find the operationName field."
+		fmt.Printf("underlogEnabled.go FormatQuery: I can't find the operationName field.\n")
 	}
+
+	//       That's because there is no operationName field.  Should there be one?
+	//
+	// 21:18:32.065 ...edin/work/260102/Abe_eliasdb/api/rest.go  157 ...liasdb/api.RegisterRestEndpoints.func1.1 From: ...v/versions/1.25.4/src/net/http/server.go 2322              net/http.HandlerFunc.ServeHTTP Running a handler function for handlerURL = /db/v1/graphql/ and handlerInst = 0x104a32d30 with http.Request:
+	// POST /db/v1/graphql/main HTTP/1.1
+	// Host: localhost:9090
+	// Accept: */*
+	// Content-Length: 49
+	// Content-Type: application/json
+	// User-Agent: curl/8.7.1
+	//
+	// { "query": "{ Person(key: \"hans\") { name } }" }
+	// formatted the graphql query:
+	// I can't find the operationName field.
+	//
+	//       I asked Grok about it.  You don't have to name your operations.  The operationName
+	//       field doesn't have to be there.
+	//
+	// No, you should not be concerned that your curl requests (or Apollo Sandbox queries)
+	// lack an operationName field.
+	//
+	// Why operationName is optional in GraphQL
+	//
+	// The operationName field in a GraphQL request payload is optional in the spec and
+	// in nearly all implementations (including graphql-go, gqlgen, Apollo Server, and
+	// EliasDB's custom runtime).
+	//
+	// It is only required in two rare cases:
+	//
+	//   1. When the request contains multiple operations (e.g. multiple named queries/mutations
+	//      in the same string) — the server needs to know which one to execute.
+	//   2. When the client wants to explicitly name the operation for logging, caching,
+	//      or debugging purposes.
+	//
+	// In your case (and in 99% of real-world usage):
+	//
+	//   1. Requests have exactly one operation.
+	//   2. The query/mutation is anonymous (no query MyQuery { ... } or mutation MyMutation { ... } name).
+	//
+	// 	The server knows exactly which operation to run — no ambiguity.
+	//
+	//       So I changed the code so that lack of an operationName field won't make
+	//       formatting bail out.
 
 	// Compress the "query":"..."} part of the line.
 
@@ -141,15 +184,19 @@ func FormatQuery(requestString string) string {
 	var leftPortion = lastLine[:queryIndex]
 	var rightPortion = lastLine[queryIndex:]
 	var replacer = strings.NewReplacer(
-		"\"", "",
-		"\\n", "",
-		" ", "",
+		`\"`, `"`,
+		`"`, ``,
+		`\n`, ``,
+		` `, ``,
 	)
 	rightPortion = replacer.Replace(rightPortion)
 	lastLine = leftPortion + rightPortion
 	fmt.Printf("Revised lastLine = -->%s<--\n", lastLine)
 	// We might discover that removing all the quote marks from the query portion is
 	// too root and branch.  Change the code when we discover problems.
+	//
+	// I did discover that removing all the quote marks was too "root and branch".
+	// See [Note 1] below this function.
 
 	// Format for easy reading.
 
@@ -224,3 +271,40 @@ func FormatQuery(requestString string) string {
 
 	return builder.String()
 }
+
+/***
+
+Here's what I found in my log file.
+
+[cors] 2026/03/07 08:33:23 Handler: Actual request
+[cors] 2026/03/07 08:33:23   Actual request no headers added: missing origin
+lastLine = -->{ "query": "{ Person(key: \"hans\") { name } }" }<--
+underlogEnabled.go FormatQuery: I can't find the operationName field.
+Revised lastLine = -->{ query:{Person(key:\hans\){name}}}<--
+08:33:23.708 ...edin/work/260102/Abe_eliasdb/api/rest.go  157 ...liasdb/api.RegisterRestEndpoints.func1.1 From: ...v/versions/1.25.4/src/net/http/server.go 2322              net/http.HandlerFunc.ServeHTTP Running a handler function for handlerURL = /db/v1/graphql/ and handlerInst = 0x100fa6dc0 with http.Request:
+POST /db/v1/graphql/main HTTP/1.1
+Host: localhost:9090
+The original text was   Accept: asteriskslashasterisk   .  I changed it because it messed up our block comment.
+Content-Length: 49
+Content-Type: application/json
+User-Agent: curl/8.7.1
+
+{ "query": "{ Person(key: \"hans\") { name } }" }
+formatted the graphql query:
+{
+     query:{
+        Person(key:\hans\){
+            name
+        }
+    }
+}
+
+I would rather convert \"s to "s.  I think.
+
+Something Gai said:
+
+If multiple patterns match at the same starting position (e.g., \" and "),
+the longer match or the one appearing earlier in your NewReplacer arguments
+takes precedence.
+
+***/
