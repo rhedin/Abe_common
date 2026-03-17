@@ -55,10 +55,9 @@ func UnderPrintf(format string, arguments ...any) {
 	pc = pc[:n] // Trim the slice to actual number of PCs
 	frames := runtime.CallersFrames(pc)
 	whoCalledUs, _ := frames.Next()
-	whoCalledThem, more := frames.Next()
-	if !more {
+	whoCalledThem, weKnowWhoCalledOurCaller := frames.Next()
+	if !weKnowWhoCalledOurCaller {
 		fmt.Printf("We do not have information about the caller of our caller.\n")
-		fmt.Printf("Leaving UnderPrintf early.\n")
 	}
 	var builder strings.Builder
 	builder.WriteString(time.Now().Format("15:04:05.000"))
@@ -70,12 +69,14 @@ func UnderPrintf(format string, arguments ...any) {
 	trunjustdots(&builder, whoCalledUs.Function, 40)
 	builder.WriteString(" From:")
 	builder.WriteString(" ")
-	trunjustdots(&builder, whoCalledThem.File, 40)
-	builder.WriteString(" ")
-	justpad(&builder, whoCalledThem.Line, 4)
-	builder.WriteString(" ")
-	trunjustdots(&builder, whoCalledThem.Function, 40)
-	builder.WriteString(" ")
+	if weKnowWhoCalledOurCaller {
+		trunjustdots(&builder, whoCalledThem.File, 40)
+		builder.WriteString(" ")
+		justpad(&builder, whoCalledThem.Line, 4)
+		builder.WriteString(" ")
+		trunjustdots(&builder, whoCalledThem.Function, 40)
+		builder.WriteString(" ")
+	}
 	builder.WriteString(format)
 	fmt.Printf(builder.String(), arguments...)
 }

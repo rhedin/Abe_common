@@ -22,6 +22,7 @@ import (
 	"os"
 	"sync"
 	"time"
+	// noisy abelog "github.com/rhedin/Abe_common/abelogutil"
 )
 
 /*
@@ -53,6 +54,7 @@ func (lf *LockFile) watch() {
 
 	res, _ := lf.checkLockfile()
 
+	// noisy abelog.UnderPrintf("About to lf.writeLockfile() when have just entered watch()\n")
 	if err := lf.writeLockfile(); err != nil {
 		lf.errorChan <- err
 		return
@@ -65,6 +67,7 @@ func (lf *LockFile) watch() {
 		// If we have overwritten an existing timestamp then check
 		// if it was overwritten again by another process after some time
 
+		// noisy abelog.UnderPrintf("About to lf.checkLockfile() when we overwrote an existing timestamp and after some time.\n")
 		res, err := lf.checkLockfile()
 
 		if res != lf.timestamp || err != nil {
@@ -87,6 +90,7 @@ func (lf *LockFile) watch() {
 
 		time.Sleep(lf.interval)
 
+		// noisy abelog.UnderPrintf("About to lf.checkLockfile() from inside once-a-second loop.\n")
 		res, err := lf.checkLockfile()
 		if err != nil {
 
@@ -103,6 +107,7 @@ func (lf *LockFile) watch() {
 			// Attempt to write the timestamp again - no error checking
 			// if it fails we'll try again next time
 
+			// noisy abelog.UnderPrintf("About to lf.writeLockfile() from inside once-a-second loop.  res != lf.timestamp\n")
 			lf.writeLockfile()
 		}
 	}
@@ -136,6 +141,14 @@ func (lf *LockFile) writeLockfile() error {
 	data[6] = byte(lf.timestamp >> 8)
 	data[7] = byte(lf.timestamp >> 0)
 
+	// noisy abelog.UnderPrintf("About to file.Write(data).  lf.filename = ", lf.filename, ", data = ", convertArrayOfEightBytesToInt64([8]byte(data)), "\n")
+	// The error message is written like this.  I will do the same,
+	// so we can match them up.
+	// 		lf.errorChan <- errors.New(fmt.Sprint(
+	// 		"Could not write lockfile - read result after writing: ", res,
+	// 		"(expected: ", lf.timestamp, ")", err))
+	// res and lf.timestamp are int64 values.
+
 	_, err = file.Write(data)
 
 	return err
@@ -165,6 +178,8 @@ func (lf *LockFile) checkLockfile() (int64, error) {
 		return 0, errors.New(fmt.Sprint("Unexpected timestamp value found in lockfile:", timestamp))
 	}
 
+	// noisy abelog.UnderPrintf("Just did file.Read(timestamp).  lf.filename = ", lf.filename, ", timestamp = ", convertArrayOfEightBytesToInt64([8]byte(timestamp)), "\n")
+
 	return (int64(timestamp[0]) << 56) |
 		(int64(timestamp[1]) << 48) |
 		(int64(timestamp[2]) << 40) |
@@ -174,6 +189,20 @@ func (lf *LockFile) checkLockfile() (int64, error) {
 		(int64(timestamp[6]) << 8) |
 		(int64(timestamp[7]) << 0), err
 }
+
+/*** noisy
+// When UnderPrintf's are shushed, this function needs to be hidden.
+func convertArrayOfEightBytesToInt64(input [8]byte) int64 {
+	return (int64(input[0]) << 56) |
+		(int64(input[1]) << 48) |
+		(int64(input[2]) << 40) |
+		(int64(input[3]) << 32) |
+		(int64(input[4]) << 24) |
+		(int64(input[5]) << 16) |
+		(int64(input[6]) << 8) |
+		(int64(input[7]) << 0)
+}
+noisy ***/
 
 /*
 Start creates the lockfile and starts watching it.

@@ -12,6 +12,7 @@ package parser
 import (
 	"fmt"
 
+	// noisy abelog "github.com/rhedin/Abe_common/abelogutil"
 	"github.com/rhedin/Abe_common/errorutil"
 )
 
@@ -85,11 +86,19 @@ ParseWithRuntime parses a given input string and returns an AST decorated with
 runtime components.
 */
 func ParseWithRuntime(name string, input string, rp RuntimeProvider) (*ASTNode, error) {
+	/*** noisy
+	abelog.UnderPrintf("parser.go ParseWithRuntime\n"+
+		"name = %s\n"+
+		"input = %s\n"+
+		"rp = %v\n",
+		name, input, rp)
+	noisy ***/
 	p := &parser{name, nil, Lex(name, input), rp, false, false}
 
 	node, err := p.next()
 
 	if err != nil {
+		// noisy abelog.UnderPrintf("ParseWithRuntime: Got err after ran parser.  err = %v\n", err)
 		return nil, err
 	}
 
@@ -99,9 +108,18 @@ func ParseWithRuntime(name string, input string, rp RuntimeProvider) (*ASTNode, 
 
 	for err == nil && p.node.Name != NodeEOF {
 
+		// noisy abelog.UnderPrintf("ParseWithRuntime: At top of loop.  Amounts to while loop.  p = %v\n", p)
+		// I don't really understand what this loop is doing.  Well, that's the point of these
+		// print-for-understanding prints.
+		// noisy abelog.UnderPrintf("p.node.Name = %s\n", p.node.Name)
+		// noisy abelog.UnderPrintf("p.node = %v\n", p.node)
+		// noisy abelog.UnderPrintf("p = %v\n", p)
+
 		if node, err = p.run(0); err == nil {
+			// noisy abelog.UnderPrintf("Came back from p.run(0).  err == nil\n")
 
 			if node != nil && node.Name == NodeSelectionSet {
+				// noisy abelog.UnderPrintf("node != nil && node.Name == NodeSelectionSet (\"SelectionSet\")\n")
 
 				// Handle query shorthand
 
@@ -114,10 +132,12 @@ func ParseWithRuntime(name string, input string, rp RuntimeProvider) (*ASTNode, 
 
 				} else {
 
+					// noisy abelog.UnderPrintf("ParseWithRuntime: In clause when len(doc.Children) != 0.\n")
 					return nil, p.newParserError(ErrMultipleShorthand,
 						node.Token.String(), *node.Token)
 				}
 			} else {
+				// noisy abelog.UnderPrintf("node == nil || node.Name != NodeSelectionSet (\"SelectionSet\")\n")
 
 				ed := newAstNode(NodeExecutableDefinition, p, node.Token)
 				doc.Children = append(doc.Children, ed)
@@ -127,9 +147,11 @@ func ParseWithRuntime(name string, input string, rp RuntimeProvider) (*ASTNode, 
 	}
 
 	if err == nil {
+		// noisy abelog.UnderPrintf("ParseWithRuntime: Got err after ran parser.  err = %v\n", err)
 		return doc, nil
 	}
 
+	// noisy abelog.UnderPrintf("ParseWithRuntime: Came out of iteration with error.  err = %v\n", err)
 	return nil, err
 }
 
@@ -140,11 +162,19 @@ func (p *parser) run(rightBinding int) (*ASTNode, error) {
 	var err error
 	var left *ASTNode
 
+	// noisy abelog.UnderPrintf("In run.\n")
+	// noisy abelog.UnderPrintf("p (receiver) = %v\n", p)
+	// noisy abelog.UnderPrintf("p (receiver) name = %v\n", p.name)
+
 	n := p.node
+
+	// noisy abelog.UnderPrintf("n.name (before if) = %v\n", n.Name)
 
 	// Get the next ASTNode
 
 	if p.node, err = p.next(); err == nil {
+
+		// noisy abelog.UnderPrintf("n.name (inside if) = %v\n", n.Name)
 
 		// All nodes have a null denotation
 
@@ -174,13 +204,19 @@ func (p *parser) next() (*ASTNode, error) {
 
 	token, more := <-p.tokens
 
+	// noisy abelog.UnderPrintf("Token channel burped out a token.  token = %v\n", token)
+
 	if !more {
+
+		// noisy abelog.UnderPrintf("(*parser).next if !more clause\n")
 
 		// Unexpected end of input - the associated token is an empty error token
 
 		return nil, p.newParserError(ErrUnexpectedEnd, "", token)
 
 	} else if token.ID == TokenError {
+
+		// noisy abelog.UnderPrintf("(*parser).next elif token.ID == TokenError clause\n")
 
 		// There was a lexer error wrap it in a parser error
 
@@ -189,14 +225,20 @@ func (p *parser) next() (*ASTNode, error) {
 	} else if node, ok := astNodeMapValues[token.Val]; ok &&
 		(!p.isValue || token.ID == TokenPunctuator) && token.ID != TokenStringValue {
 
+		// noisy abelog.UnderPrintf("(*parser).next elif astNodeMapValues et al clause\n")
+
 		// Parse complex expressions unless we parse a value (then just deal with punctuators)
 
 		return node.instance(p, &token), nil
 
 	} else if node, ok := astNodeMapTokens[token.ID]; ok {
 
+		// noisy abelog.UnderPrintf("(*parser).next elif astNodeMapTokens clause\n")
+
 		return node.instance(p, &token), nil
 	}
+
+	// noisy abelog.UnderPrintf("(*parser).next after if structure\n")
 
 	return nil, p.newParserError(ErrUnknownToken, fmt.Sprintf("id:%v (%v)", token.ID, token), token)
 }

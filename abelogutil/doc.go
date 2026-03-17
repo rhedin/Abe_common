@@ -1,4 +1,4 @@
-// Packbge abelogutil is to provide detailed logging while I'm trying to figure out
+// Package abelogutil is to provide detailed logging while I'm trying to figure out
 // what Matthias Ladkau's eliasdb and ecal programs do.
 //
 // A fair amount of effort is put into logging when the flow arrives in a routine,
