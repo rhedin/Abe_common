@@ -39,10 +39,12 @@ func LoadConfig(filename string, defaultConfig map[string]interface{}) (map[stri
 	var err error
 	var ok bool
 
-	if ok, err = PathExists(filename); err != nil {
+	ok, err = PathExists(filename)
+	if err != nil {
 		return nil, err
+	}
 
-	} else if ok {
+	if ok {
 
 		// Load config
 
@@ -62,7 +64,7 @@ func LoadConfig(filename string, defaultConfig map[string]interface{}) (map[stri
 			}
 		}
 
-	} else if err == nil {
+	} else {
 
 		// Write config
 
