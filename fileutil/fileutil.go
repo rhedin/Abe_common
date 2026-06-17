@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/rhedin/Abe_common/bitutil"
 	"github.com/rhedin/Abe_common/pools"
@@ -32,6 +33,18 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+/*
+PathExistsWildcard returns whether any file or directory matches the given glob pattern.
+It uses filepath.Glob internally, so it supports *, ?, and [...] wildcards.
+*/
+func PathExistsWildcard(pattern string) (bool, error) {
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return false, err
+	}
+	return len(matches) > 0, nil
 }
 
 /*
